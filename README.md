@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="DSH X402 Wallet" width="380">
+  <img src="logo.jpeg" alt="DSH X402 Wallet" width="420">
 </p>
 
 # dsh-x402-wallet
