@@ -61,7 +61,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/danielng23/dsh-x402-wallet.git",
+    "url": "git+https://github.com/ph4310822/dsh-x402-wallet.git",
     "directory": "packages/ui"
   }
 }
