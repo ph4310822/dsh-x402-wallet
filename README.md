@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="DSH X402 Wallet" width="380">
+</p>
+
 # dsh-x402-wallet
 
 **A visual x402 payment wallet for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).** Install one bundle and your agent can discover paid APIs, estimate their cost, and pay-and-call them over the [x402](https://www.x402.org/) protocol — while a Phantom-style wallet popup gives you multi-wallet custody, QR receive, USDC send, and on-chain activity, all inside the DSH web GUI.
