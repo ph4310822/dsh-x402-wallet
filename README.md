@@ -8,6 +8,8 @@ dsh plugin --profile web add @danielng23/dsh-x402-wallet
 
 Restart `dsh web` — the **x402 钱包** entry appears in the sidebar.
 
+![dsh-x402-wallet — the x402 payment wallet popup in the DeepSeek Harness web GUI](screenshot.png)
+
 ## What it is
 
 - **Your agent can pay for APIs.** Four model tools (`x402_discover`, `x402_estimate`, `x402_balance`, `x402_pay`) discover x402-enabled APIs, probe their price without paying, and pay-and-call them with a spend cap and your approval.
