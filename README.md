@@ -10,7 +10,7 @@
 dsh plugin --profile web add @danielng23/dsh-x402-wallet
 ```
 
-Restart `dsh web` — the **x402 钱包** entry appears in the sidebar.
+Restart `dsh web` — the **x402 Wallet** entry appears in the sidebar.
 
 ![dsh-x402-wallet — the x402 payment wallet popup in the DeepSeek Harness web GUI](screenshot.png)
 
@@ -29,7 +29,7 @@ Two different transfers, one wallet:
 | What | How it works | Gas |
 |---|---|---|
 | Agent calls a paid API | Model runs `x402_pay` → probe → cap → approval → EIP-3009 signature → gateway settles | none (paid by the API provider's gateway) |
-| You move funds out of the wallet | Popup **发送** → plain on-chain ERC-20 transfer (viem, awaited receipt) | yes (normal network gas) |
+| You move funds out of the wallet | Popup **Send** → plain on-chain ERC-20 transfer (viem, awaited receipt) | yes (normal network gas) |
 
 ## Install
 
@@ -50,7 +50,7 @@ To undo: `dsh plugin --profile web remove @danielng23/dsh-x402-wallet`. The wall
 
 ## Wallet setup
 
-1. Open the wallet popup and **创建钱包** (generate or import a private key), or keep the legacy single-key credential `X402_PRIVATE_KEY`.
+1. Open the wallet popup and **Create wallet** (generate or import a private key), or keep the legacy single-key credential `X402_PRIVATE_KEY`.
 2. Fund the selected wallet with a few USDC on Base — the receive screen shows the address and a QR code.
 3. Ask the agent for a task that needs a paid API; the approval prompt shows the exact amount and recipient before anything is signed.
 
