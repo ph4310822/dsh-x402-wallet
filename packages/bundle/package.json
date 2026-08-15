@@ -1,0 +1,24 @@
+{
+  "name": "@danielng23/dsh-x402-wallet",
+  "description": "Installable DSH bundle: x402 payment host service + wallet GUI as an opt-in web-profile patch layer",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@danielng23/dsh-x402": "^0.1.0",
+    "@danielng23/dsh-client-ui-x402": "^0.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielng23/dsh-x402-wallet.git",
+    "directory": "packages/bundle"
+  }
+}

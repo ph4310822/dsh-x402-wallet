@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2024",
+    "lib": ["es2024", "dom", "dom.iterable"],
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@danielng23/dsh-x402": ["./packages/host/src/index.ts"],
+      "@danielng23/dsh-x402/types": ["./packages/host/src/types.ts"],
+      "@danielng23/dsh-x402/invariant": ["./packages/host/src/invariant.ts"],
+      "@danielng23/dsh-client-ui-x402": ["./packages/ui/src/index.ts"],
+      "@danielng23/dsh-client-ui-x402/client": ["./packages/ui/src/client/index.ts"]
+    }
+  }
+}

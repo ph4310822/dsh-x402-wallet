@@ -1,0 +1,1 @@
+{"version":3,"file":"typert.remote-client.d.ts","names":["createWallet","history","payments","selectWallet","send","wallet","wallets"],"sources":["../src/index.ts"],"sourcesContent":[null],"mappings":";;;;;;;;;IA4QQA,Y;IA2DAC,O;IAUNC,Q;IArCMC,Y;IAaAC,I;IAjFAC,M;IAsBAC,O;;;IAcAN,mB;IA2DAC,c;IAUNC,e;IArCMC,mB;IAaAC,W;IAjFAC,a;IAsBAC,c","ignoreList":[]}

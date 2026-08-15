@@ -1,0 +1,17 @@
+{
+  "name": "dsh-x402-wallet",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc -b packages/host packages/ui",
+    "test": "vitest run packages/host/tests packages/ui/tests"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8",
+    "tsx": "^4.22.4"
+  }
+}

@@ -1,0 +1,7 @@
+# Opt-in patch layer: mount the x402 payment host service and its wallet GUI
+# into a dsh web profile. Insert rows are additive; later layers win per row.
+- insert:
+    - id: x402
+      name: '@danielng23/dsh-x402'
+    - id: ui-x402
+      name: '@danielng23/dsh-client-ui-x402'

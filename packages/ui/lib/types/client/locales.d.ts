@@ -1,0 +1,133 @@
+/** x402 wallet GUI dictionaries. */
+export declare const NS = "x402";
+/** Simplified Chinese x402 wallet messages. */
+export declare const zh: {
+    'panel.title': string;
+    'a11y.wallet': string;
+    'action.refresh': string;
+    'modal.title': string;
+    'modal.close': string;
+    'modal.network': string;
+    'modal.error': string;
+    'common.back': string;
+    'entry.unconfigured': string;
+    'main.loading': string;
+    'main.empty': string;
+    'main.emptyHint': string;
+    'main.create': string;
+    'main.balance': string;
+    'main.send': string;
+    'main.receive': string;
+    'main.assets': string;
+    'main.activity': string;
+    'main.activityEmpty': string;
+    'main.payments': string;
+    'main.paymentsEmpty': string;
+    'switch.title': string;
+    'switch.current': string;
+    'switch.new': string;
+    'receive.hint': string;
+    'receive.address': string;
+    'receive.copy': string;
+    'receive.copied': string;
+    'receive.qr': string;
+    'send.to': string;
+    'send.toPlaceholder': string;
+    'send.amount': string;
+    'send.amountPlaceholder': string;
+    'send.submit': string;
+    'send.busy': string;
+    'send.confirmed': string;
+    'send.transaction': string;
+    'send.done': string;
+    'send.invalid': string;
+    'send.error': string;
+    'create.title': string;
+    'create.label': string;
+    'create.labelPlaceholder': string;
+    'create.generate': string;
+    'create.import': string;
+    'create.importHint': string;
+    'create.privateKey': string;
+    'create.privateKeyPlaceholder': string;
+    'create.submit': string;
+    'create.busy': string;
+    'create.error': string;
+    'history.settled': string;
+    'history.failed': string;
+    'row.paid': string;
+    'row.free': string;
+    'row.awaiting': string;
+    'row.rejected': string;
+    'row.paymentRequired': string;
+};
+/** Translation keys owned by the x402 UI namespace. */
+export type X402Key = keyof typeof zh;
+declare module '@deepseek-ai/dsh-client-ui-slots' {
+    interface LocaleNamespaceMap {
+        /** x402 wallet UI copy. */
+        x402: X402Key;
+    }
+}
+/** English x402 wallet messages. */
+export declare const en: {
+    'panel.title': string;
+    'a11y.wallet': string;
+    'action.refresh': string;
+    'modal.title': string;
+    'modal.close': string;
+    'modal.network': string;
+    'modal.error': string;
+    'common.back': string;
+    'entry.unconfigured': string;
+    'main.loading': string;
+    'main.empty': string;
+    'main.emptyHint': string;
+    'main.create': string;
+    'main.balance': string;
+    'main.send': string;
+    'main.receive': string;
+    'main.assets': string;
+    'main.activity': string;
+    'main.activityEmpty': string;
+    'main.payments': string;
+    'main.paymentsEmpty': string;
+    'switch.title': string;
+    'switch.current': string;
+    'switch.new': string;
+    'receive.hint': string;
+    'receive.address': string;
+    'receive.copy': string;
+    'receive.copied': string;
+    'receive.qr': string;
+    'send.to': string;
+    'send.toPlaceholder': string;
+    'send.amount': string;
+    'send.amountPlaceholder': string;
+    'send.submit': string;
+    'send.busy': string;
+    'send.confirmed': string;
+    'send.transaction': string;
+    'send.done': string;
+    'send.invalid': string;
+    'send.error': string;
+    'create.title': string;
+    'create.label': string;
+    'create.labelPlaceholder': string;
+    'create.generate': string;
+    'create.import': string;
+    'create.importHint': string;
+    'create.privateKey': string;
+    'create.privateKeyPlaceholder': string;
+    'create.submit': string;
+    'create.busy': string;
+    'create.error': string;
+    'history.settled': string;
+    'history.failed': string;
+    'row.paid': string;
+    'row.free': string;
+    'row.awaiting': string;
+    'row.rejected': string;
+    'row.paymentRequired': string;
+};
+//# sourceMappingURL=locales.d.ts.map
