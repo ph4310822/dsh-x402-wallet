@@ -165,11 +165,13 @@ function createX402Protocol(deps) {
 		publicClient ??= makePublic();
 		return publicClient;
 	}
+	/** Resolve the signing account from the current wallet key, re-registering the scheme on switch. */
 	async function requireAccount() {
-		if (account === void 0) {
-			const key = await deps.resolveKey();
-			if (key === void 0 || key.trim().length === 0) throw new X402Error("wallet-not-configured", "x402 wallet is not configured. Set the X402_PRIVATE_KEY credential (a dedicated spending wallet, not your main wallet) through the credentials store or environment, then retry.");
-			account = privateKeyToAccount(key.trim());
+		const key = await deps.resolveKey();
+		if (key === void 0 || key.trim().length === 0) throw new X402Error("wallet-not-configured", "x402 wallet is not configured. Set the X402_PRIVATE_KEY credential (a dedicated spending wallet, not your main wallet) through the credentials store or environment, then retry.");
+		const next = privateKeyToAccount(key.trim());
+		if (account === void 0 || account.address !== next.address) {
+			account = next;
 			client.register(deps.network, new ExactEvmScheme(account));
 		}
 		return account;

@@ -233,17 +233,19 @@ export function createX402Protocol(deps: X402ProtocolDeps): X402Protocol {
     return publicClient
   }
 
+  /** Resolve the signing account from the current wallet key, re-registering the scheme on switch. */
   async function requireAccount(): Promise<LocalAccount> {
-    if (account === undefined) {
-      const key = await deps.resolveKey()
-      if (key === undefined || key.trim().length === 0) {
-        throw new X402Error(
-          'wallet-not-configured',
-          'x402 wallet is not configured. Set the X402_PRIVATE_KEY credential (a dedicated spending wallet, not your main wallet) '
-            + 'through the credentials store or environment, then retry.',
-        )
-      }
-      account = privateKeyToAccount(key.trim() as Hex)
+    const key = await deps.resolveKey()
+    if (key === undefined || key.trim().length === 0) {
+      throw new X402Error(
+        'wallet-not-configured',
+        'x402 wallet is not configured. Set the X402_PRIVATE_KEY credential (a dedicated spending wallet, not your main wallet) '
+          + 'through the credentials store or environment, then retry.',
+      )
+    }
+    const next = privateKeyToAccount(key.trim() as Hex)
+    if (account === undefined || account.address !== next.address) {
+      account = next
       client.register(deps.network, new ExactEvmScheme(account))
     }
     return account
