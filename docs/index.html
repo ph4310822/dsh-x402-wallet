@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DSH X402 Wallet — a visual x402 payment wallet for DeepSeek Harness</title>
+  <meta name="description" content="Install one bundle and your DeepSeek Harness agent can discover paid APIs, estimate their cost, and pay-and-call them over the x402 protocol — with a Phantom-style wallet popup in the DSH web GUI.">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpeg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#top">
+      <img src="assets/logo.jpeg" alt="DSH X402 Wallet" height="34">
+    </a>
+    <nav class="nav">
+      <a href="#features" data-en>Features</a>
+      <a href="#features" data-zh>功能</a>
+      <a href="#how" data-en>How it works</a>
+      <a href="#how" data-zh>工作原理</a>
+      <a href="#install" data-en>Install</a>
+      <a href="#install" data-zh>安装</a>
+      <a class="btn btn-small" href="https://github.com/ph4310822/dsh-x402-wallet" target="_blank" rel="noopener" data-en>GitHub</a>
+      <a class="btn btn-small" href="https://github.com/ph4310822/dsh-x402-wallet" target="_blank" rel="noopener" data-zh>GitHub</a>
+      <button id="lang" class="btn btn-small btn-ghost" type="button" aria-label="Switch language">中文</button>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="hero-inner">
+      <img class="hero-logo" src="assets/logo.jpeg" alt="DSH X402 Wallet">
+      <h1 data-en>DSH X402 Wallet</h1>
+      <h1 data-zh>DSH X402 Wallet</h1>
+      <p class="tagline" data-en>
+        A visual x402 payment wallet for <a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noopener">DeepSeek Harness</a>.
+        Your agent discovers paid APIs, estimates their cost, and pays-and-calls them over the
+        <a href="https://www.x402.org/" target="_blank" rel="noopener">x402</a> protocol — while a Phantom-style
+        wallet popup keeps custody, QR receive, USDC send, and on-chain activity inside the DSH web GUI.
+      </p>
+      <p class="tagline" data-zh>
+        给 <a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noopener">DeepSeek Harness</a>
+        的可视化 x402 支付钱包。你的 Agent 通过
+        <a href="https://www.x402.org/" target="_blank" rel="noopener">x402</a> 协议发现付费 API、估算价格并支付调用——
+        Phantom 风格钱包弹窗在 DSH Web GUI 里提供多钱包托管、二维码收款、USDC 转出与链上活动。
+      </p>
+      <div class="hero-actions">
+        <button id="copy" class="btn btn-primary" type="button" data-en>Copy install command</button>
+        <button id="copy" class="btn btn-primary" type="button" data-zh>复制安装命令</button>
+        <a class="btn btn-ghost" href="https://github.com/ph4310822/dsh-x402-wallet#readme" target="_blank" rel="noopener" data-en>Read the docs</a>
+        <a class="btn btn-ghost" href="https://github.com/ph4310822/dsh-x402-wallet#readme" target="_blank" rel="noopener" data-zh>阅读文档</a>
+      </div>
+      <pre class="code"><code>dsh plugin --profile web add @danielng23/dsh-x402-wallet</code></pre>
+      <p class="hint" data-en>Restart <code>dsh web</code> — the <strong>x402 Wallet</strong> entry appears in the sidebar.</p>
+      <p class="hint" data-zh>重启 <code>dsh web</code>——侧边栏出现 <strong>x402 钱包</strong> 入口。</p>
+    </div>
+  </section>
+
+  <section class="shot">
+    <img src="assets/screenshot.png" alt="DSH X402 Wallet popup in the DeepSeek Harness web GUI">
+  </section>
+
+  <section id="features" class="section">
+    <h2 data-en>What it is</h2>
+    <h2 data-zh>它是什么</h2>
+    <div class="cards">
+      <article class="card">
+        <h3 data-en>Your agent can pay for APIs</h3>
+        <h3 data-zh>你的 Agent 可以为 API 付费</h3>
+        <p data-en>Four model tools — <code>x402_discover</code>, <code>x402_estimate</code>, <code>x402_balance</code>, <code>x402_pay</code> — discover x402-enabled APIs, probe their price without paying, and pay-and-call them with a spend cap and your approval.</p>
+        <p data-zh>四个模型工具——<code>x402_discover</code>、<code>x402_estimate</code>、<code>x402_balance</code>、<code>x402_pay</code>——发现支持 x402 的 API、不花钱探测价格，并在支出上限与你的审批下支付并调用。</p>
+      </article>
+      <article class="card">
+        <h3 data-en>Your wallet is a first-class GUI surface</h3>
+        <h3 data-zh>你的钱包是一等的 GUI 表面</h3>
+        <p data-en>A Phantom-style popup manages several wallets (create / import / switch), shows the USDC balance, a QR receive screen, an on-chain transfer history, and a send form.</p>
+        <p data-zh>Phantom 风格弹窗管理多个钱包（创建/导入/切换）、展示 USDC 余额、二维码收款屏、链上转账历史与转出表单。</p>
+      </article>
+      <article class="card">
+        <h3 data-en>Keys never leave your machine</h3>
+        <h3 data-zh>密钥绝不离开你的机器</h3>
+        <p data-en>Private keys live only in the Host credential store; the model, the logs, and the browser page never see them.</p>
+        <p data-zh>私钥只存放在 Host 凭据存储中；模型、日志与浏览器页面永远看不到它们。</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="how" class="section section-alt">
+    <h2 data-en>How x402 payments work</h2>
+    <h2 data-zh>x402 支付如何工作</h2>
+    <p class="lead" data-en>The wallet speaks the x402 protocol natively with the <strong>exact (EIP-3009)</strong> scheme: the wallet signs a transfer authorization and the gateway settles on-chain — the wallet pays <strong>no gas</strong>. Every paid call enforces <code>maxCostUsdc</code> and asks for your approval first.</p>
+    <p class="lead" data-zh>钱包原生使用 x402 协议的 <strong>exact（EIP-3009）</strong> scheme：钱包签署转账授权，网关在链上结算——钱包<strong>不付 gas</strong>。每笔付费调用强制执行 <code>maxCostUsdc</code>，并先请求你的审批。</p>
+    <div class="cards cards-two">
+      <article class="card">
+        <h3 data-en>Agent calls a paid API</h3>
+        <h3 data-zh>Agent 调用付费 API</h3>
+        <p data-en>Model runs <code>x402_pay</code> → probe → cap → approval → EIP-3009 signature → gateway settles. Gas: <strong>none</strong>.</p>
+        <p data-zh>模型执行 <code>x402_pay</code> → 探测 → 上限 → 审批 → EIP-3009 签名 → 网关结算。Gas：<strong>无</strong>。</p>
+      </article>
+      <article class="card">
+        <h3 data-en>You move funds out of the wallet</h3>
+        <h3 data-zh>你把资金转出钱包</h3>
+        <p data-en>Popup <strong>Send</strong> → plain on-chain ERC-20 transfer (viem, awaited receipt). Gas: <strong>yes</strong> (normal network gas).</p>
+        <p data-zh>弹窗 <strong>发送</strong> → 普通链上 ERC-20 转账（viem，等待回执）。Gas：<strong>有</strong>（正常网络 gas）。</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="install" class="section">
+    <h2 data-en>Install</h2>
+    <h2 data-zh>安装</h2>
+    <pre class="code"><code>dsh plugin --profile web add @danielng23/dsh-x402-wallet</code></pre>
+    <p class="hint" data-en>Published on the npm registry for any DSH installation. The wallet is opt-in — the shipped DSH web profile does not include it. Uninstall with <code>dsh plugin --profile web remove @danielng23/dsh-x402-wallet</code>.</p>
+    <p class="hint" data-zh>已发布到 npm registry，适用于任意 DSH 安装。钱包是 opt-in 的——随产品发布的 DSH web profile 不包含它。卸载：<code>dsh plugin --profile web remove @danielng23/dsh-x402-wallet</code>。</p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span data-en>Built on</span><span data-zh>构建于</span>
+    <a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noopener">DeepSeek Harness</a>
+    <span>·</span>
+    <a href="https://www.x402.org/" target="_blank" rel="noopener">x402 protocol</a>
+    <span>·</span>
+    <a href="https://www.npmjs.com/package/@danielng23/dsh-x402-wallet" target="_blank" rel="noopener">npm</a>
+    <span>·</span>
+    <a href="https://github.com/ph4310822/dsh-x402-wallet" target="_blank" rel="noopener">GitHub</a>
+    <p class="copy">MIT · dsh-x402-wallet</p>
+  </div>
+</footer>
+
+<script>
+  // Language toggle: flips [data-en]/[data-zh] visibility and the button label.
+  (function () {
+    var zh = false
+    var btn = document.getElementById('lang')
+    function apply() {
+      document.documentElement.lang = zh ? 'zh' : 'en'
+      document.querySelectorAll('[data-en]').forEach(function (el) { el.hidden = zh })
+      document.querySelectorAll('[data-zh]').forEach(function (el) { el.hidden = !zh })
+      btn.textContent = zh ? 'English' : '中文'
+    }
+    btn.addEventListener('click', function () { zh = !zh; apply() })
+    apply()
+
+    // Copy the install command on click.
+    var copy = document.getElementById('copy')
+    copy.addEventListener('click', function () {
+      navigator.clipboard.writeText('dsh plugin --profile web add @danielng23/dsh-x402-wallet').then(function () {
+        copy.textContent = zh ? '已复制 ✓' : 'Copied ✓'
+        setTimeout(function () {
+          copy.textContent = zh ? '复制安装命令' : 'Copy install command'
+        }, 1500)
+      })
+    })
+  })()
+</script>
+
+</body>
+</html>

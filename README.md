@@ -64,6 +64,10 @@ packages/ui/       @danielng23/dsh-client-ui-x402   browser GUI (dsh.client mani
 packages/bundle/   @danielng23/dsh-x402-wallet      installable patch layer
 ```
 
+## Website
+
+Product site: <https://ph4310822.github.io/dsh-x402-wallet/> (static, in `docs/`).
+
 ## Ecosystem position
 
 - Built on the [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) plugin system — everything is a plugin; this bundle is two rows in a `cordis.yml` patch layer.
