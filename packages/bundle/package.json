@@ -1,7 +1,7 @@
 {
   "name": "@danielng23/dsh-x402-wallet",
   "description": "Installable DSH bundle: x402 payment host service + wallet GUI as an opt-in web-profile patch layer",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "license": "MIT",
   "dsh": {
