@@ -96,6 +96,7 @@ let X402Service = (() => {
         records = [];
         nextRecord = 1;
         walletStore;
+        paymentsTable;
         /**
          * @param ctx - Host context carrying tools, credentials, approval, and system-prompt services.
          * @param config - Loader-validated deployment configuration.
@@ -124,6 +125,8 @@ let X402Service = (() => {
                     await domain.close();
                 }, 'x402.walletDomainClose');
                 this.walletStore = new StorageWalletStore(domain);
+                this.paymentsTable = domain.table('payments');
+                this.restorePayments(this.paymentsTable);
                 await this.seedLegacyWallet();
             }
         }
@@ -139,7 +142,7 @@ let X402Service = (() => {
             const store = this.requireWalletStore();
             const current = await store.current();
             if (current === undefined) {
-                throw new X402Error('wallet-not-configured', '还没有钱包——先在钱包面板创建一个。');
+                throw new X402Error('wallet-not-configured', 'No wallet yet — create one in the wallet panel first.');
             }
             return current;
         }
@@ -169,7 +172,7 @@ let X402Service = (() => {
             const address = privateKeyToAccount(hit.value.trim()).address;
             const wallet = {
                 id: mintWalletId(),
-                label: '默认钱包',
+                label: 'Default wallet',
                 address,
                 keyRef: this.config.keyRef,
                 createdAt: Date.now(),
@@ -262,7 +265,7 @@ let X402Service = (() => {
             const store = this.requireWalletStore();
             const label = request.label.trim();
             if (label.length === 0)
-                throw new X402Error('invalid-wallet', '钱包名称不能为空。');
+                throw new X402Error('invalid-wallet', 'Wallet label must not be empty.');
             const id = mintWalletId();
             const keyRef = keyRefOf(id);
             const privateKey = request.privateKey?.trim();
@@ -275,7 +278,7 @@ let X402Service = (() => {
                     privateKeyToAccount(privateKey);
                 }
                 catch {
-                    throw new X402Error('invalid-wallet', '导入的私钥无效。');
+                    throw new X402Error('invalid-wallet', 'The imported private key is invalid.');
                 }
                 key = privateKey;
             }
@@ -295,7 +298,7 @@ let X402Service = (() => {
         async selectWallet(id) {
             const store = this.requireWalletStore();
             if ((await store.get(id)) === undefined)
-                throw new X402Error('wallet-not-found', `x402: 未知的钱包 ${id}`);
+                throw new X402Error('wallet-not-found', `x402: unknown wallet ${id}`);
             await store.setCurrent(id);
             return { ok: true };
         }
@@ -308,7 +311,7 @@ let X402Service = (() => {
             await this.requireCurrentWallet();
             const to = request.to.trim();
             if (!isAddress(to))
-                throw new X402Error('invalid-wallet', `无效的收款地址 "${request.to}"。`);
+                throw new X402Error('invalid-wallet', `Invalid recipient address "${request.to}".`);
             const { transaction } = await this.protocol.send(to, request.amountUsdc);
             return { transaction, to, amountUsdc: request.amountUsdc, status: 'confirmed' };
         }
@@ -350,18 +353,18 @@ let X402Service = (() => {
                     agent: request.agent,
                     toolName: 'x402_pay',
                     ...(request.callId === undefined ? {} : { callId: request.callId }),
-                    reason: `x402 支付 ${requirement.amountUsdc} USDC 给 ${requirement.payTo}，用于 ${requirement.resource}`,
+                    reason: `x402 pay ${requirement.amountUsdc} USDC to ${requirement.payTo} for ${requirement.resource}`,
                     ...(request.signal === undefined ? {} : { signal: request.signal }),
                 });
                 if (outcome === 'rejected' || outcome === 'cancelled') {
-                    throw new X402Error('rejected', 'x402 支付被拒绝，未发生任何扣款。');
+                    throw new X402Error('rejected', 'The x402 payment was rejected; nothing was charged.');
                 }
                 if (outcome === 'unavailable') {
-                    throw new X402Error('rejected', '没有可用的审批应答者，x402 支付已安全拒绝。');
+                    throw new X402Error('rejected', 'No approval responder is available; the x402 payment was safely rejected.');
                 }
             });
             if (receipt.paymentStatus === 'settled' || receipt.paymentStatus === 'settle_failed') {
-                this.record({
+                await this.record({
                     url: request.url,
                     amountUsdc: paidAmount,
                     ...(receipt.transaction === undefined ? {} : { transaction: receipt.transaction }),
@@ -370,8 +373,16 @@ let X402Service = (() => {
             }
             return receipt;
         }
-        /** Append one payment to the process-local ring and broadcast it to the GUI. */
-        record(entry) {
+        /** Reload the durable payment ring from the domain; the ring stays capped at the newest records. */
+        restorePayments(table) {
+            const rows = [...table.entries()].map(([, record]) => record).sort((a, b) => a.time - b.time);
+            this.records.push(...rows.slice(-MAX_RECORDS));
+            const ids = rows.map(record => Number(record.id.replace(/^x402-/, ''))).filter(Number.isFinite);
+            if (ids.length > 0)
+                this.nextRecord = Math.max(...ids) + 1;
+        }
+        /** Append one payment to the ring, persist it, and broadcast it to the GUI. */
+        async record(entry) {
             const record = {
                 ...entry,
                 id: `x402-${this.nextRecord++}`,
@@ -379,8 +390,20 @@ let X402Service = (() => {
                 time: Date.now(),
             };
             this.records.push(record);
-            if (this.records.length > MAX_RECORDS)
-                this.records.shift();
+            const evicted = this.records.length > MAX_RECORDS ? this.records.shift() : undefined;
+            const table = this.paymentsTable;
+            if (table !== undefined) {
+                // Persistence is best-effort: a failed write must not fail the paid call.
+                try {
+                    await table.put(record.id, record);
+                    /* v8 ignore next 2 -- eviction with a live table needs 101 real paid calls; the in-memory depth cap covers the shift logic. */
+                    if (evicted !== undefined)
+                        await table.delete(evicted.id);
+                }
+                catch {
+                    // Storage is down — the in-memory ring and the session log still hold the record.
+                }
+            }
             this.ctx.emit('x402/payment', record);
         }
     };

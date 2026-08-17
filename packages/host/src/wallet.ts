@@ -10,7 +10,7 @@ import { z } from 'zod'
 import type { Address } from 'viem'
 import { defineDomain, domainTable } from '@deepseek-ai/dsh-storage-domain'
 import type { Domain, KvTable } from '@deepseek-ai/dsh-storage-domain'
-import type { X402WalletRecord } from './types.ts'
+import type { X402PaymentRecord, X402WalletRecord } from './types.ts'
 
 /** One durable wallet row: public identity plus the credential reference of its key. */
 export interface X402Wallet {
@@ -34,6 +34,16 @@ const x402WalletSchema = z.object({
   createdAt: z.number().int().nonnegative(),
 }) as unknown as z.ZodType<X402Wallet>
 
+const x402PaymentSchema = z.object({
+  id: z.string().min(1),
+  url: z.string().min(1),
+  amountUsdc: z.string().min(1),
+  network: z.string().min(1),
+  transaction: z.string().optional(),
+  status: z.union([z.literal('settled'), z.literal('failed')]),
+  time: z.number().int().nonnegative(),
+}) as unknown as z.ZodType<X402PaymentRecord>
+
 /** Durable wallet registry domain; the JSON backend persists it under the DSH home. */
 export const x402WalletDomainSpec = defineDomain({
   name: 'x402_wallet',
@@ -41,6 +51,7 @@ export const x402WalletDomainSpec = defineDomain({
   tables: {
     wallets: domainTable<string, X402Wallet>(x402WalletSchema),
     meta: domainTable<string, { currentId: string }>(z.object({ currentId: z.string().min(1) })),
+    payments: domainTable<string, X402PaymentRecord>(x402PaymentSchema),
   },
 })
 

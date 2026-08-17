@@ -84,7 +84,7 @@ export const TYPERT_REMOTE = {
         typeSymbol: '@deepseek-ai/dsh-x402/types#X402WalletRecord',
         schema: _deepseek_ai_dsh_x402_x402_createWallet_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":269,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":273,"column":9},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/history',
@@ -110,7 +110,7 @@ export const TYPERT_REMOTE = {
         typeSymbol: '@deepseek-ai/dsh-x402#x402/history:result',
         schema: _deepseek_ai_dsh_x402_x402_history_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":328,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":332,"column":9},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/payments',
@@ -125,7 +125,7 @@ export const TYPERT_REMOTE = {
         typeSymbol: '@deepseek-ai/dsh-x402#x402/payments:result',
         schema: _deepseek_ai_dsh_x402_x402_payments_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":338,"column":3},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":342,"column":3},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/selectWallet',
@@ -150,7 +150,7 @@ export const TYPERT_REMOTE = {
         typeSymbol: '@deepseek-ai/dsh-x402#x402/selectWallet:result',
         schema: _deepseek_ai_dsh_x402_x402_selectWallet_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":301,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":305,"column":9},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/send',
@@ -175,7 +175,7 @@ export const TYPERT_REMOTE = {
         typeSymbol: '@deepseek-ai/dsh-x402/types#X402SendReceipt',
         schema: _deepseek_ai_dsh_x402_x402_send_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":314,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":318,"column":9},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/wallet',
@@ -190,7 +190,7 @@ export const TYPERT_REMOTE = {
         typeSymbol: '@deepseek-ai/dsh-x402/types#X402WalletState',
         schema: _deepseek_ai_dsh_x402_x402_wallet_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":233,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":237,"column":9},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/wallets',
@@ -205,7 +205,7 @@ export const TYPERT_REMOTE = {
         typeSymbol: '@deepseek-ai/dsh-x402#x402/wallets:result',
         schema: _deepseek_ai_dsh_x402_x402_wallets_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":255,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":259,"column":9},
     },
   ],
 }

@@ -14,6 +14,15 @@ const x402WalletSchema = z.object({
     keyRef: z.string().min(1),
     createdAt: z.number().int().nonnegative(),
 });
+const x402PaymentSchema = z.object({
+    id: z.string().min(1),
+    url: z.string().min(1),
+    amountUsdc: z.string().min(1),
+    network: z.string().min(1),
+    transaction: z.string().optional(),
+    status: z.union([z.literal('settled'), z.literal('failed')]),
+    time: z.number().int().nonnegative(),
+});
 /** Durable wallet registry domain; the JSON backend persists it under the DSH home. */
 export const x402WalletDomainSpec = defineDomain({
     name: 'x402_wallet',
@@ -21,6 +30,7 @@ export const x402WalletDomainSpec = defineDomain({
     tables: {
         wallets: domainTable(x402WalletSchema),
         meta: domainTable(z.object({ currentId: z.string().min(1) })),
+        payments: domainTable(x402PaymentSchema),
     },
 });
 /** The current-selection meta row key. */

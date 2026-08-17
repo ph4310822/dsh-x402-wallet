@@ -29,6 +29,7 @@ import {
   keyRefOf, mintWalletId, StorageWalletStore, walletRecord, x402WalletDomainSpec,
 } from './wallet.ts'
 import type { X402Wallet, X402WalletStore } from './wallet.ts'
+import type { KvTable } from '@deepseek-ai/dsh-storage-domain'
 
 declare module '@deepseek-ai/cordis' {
   interface Context {
@@ -86,6 +87,7 @@ export class X402Service extends TypertRemoteService {
   private readonly records: X402PaymentRecord[] = []
   private nextRecord = 1
   private walletStore: X402WalletStore | undefined
+  private paymentsTable: KvTable<string, X402PaymentRecord> | undefined
 
   /**
    * @param ctx - Host context carrying tools, credentials, approval, and system-prompt services.
@@ -116,6 +118,8 @@ export class X402Service extends TypertRemoteService {
         await domain.close()
       }, 'x402.walletDomainClose')
       this.walletStore = new StorageWalletStore(domain)
+      this.paymentsTable = domain.table('payments')
+      this.restorePayments(this.paymentsTable)
       await this.seedLegacyWallet()
     }
   }
@@ -133,7 +137,7 @@ export class X402Service extends TypertRemoteService {
     const store = this.requireWalletStore()
     const current = await store.current()
     if (current === undefined) {
-      throw new X402Error('wallet-not-configured', '还没有钱包——先在钱包面板创建一个。')
+      throw new X402Error('wallet-not-configured', 'No wallet yet — create one in the wallet panel first.')
     }
     return current
   }
@@ -162,7 +166,7 @@ export class X402Service extends TypertRemoteService {
     const address = privateKeyToAccount(hit.value.trim() as Hex).address
     const wallet: X402Wallet = {
       id: mintWalletId(),
-      label: '默认钱包',
+      label: 'Default wallet',
       address,
       keyRef: this.config.keyRef,
       createdAt: Date.now(),
@@ -269,7 +273,7 @@ export class X402Service extends TypertRemoteService {
   async createWallet(request: { label: string; privateKey?: string }): Promise<X402WalletRecord> {
     const store = this.requireWalletStore()
     const label = request.label.trim()
-    if (label.length === 0) throw new X402Error('invalid-wallet', '钱包名称不能为空。')
+    if (label.length === 0) throw new X402Error('invalid-wallet', 'Wallet label must not be empty.')
     const id = mintWalletId()
     const keyRef = keyRefOf(id)
     const privateKey = request.privateKey?.trim()
@@ -280,7 +284,7 @@ export class X402Service extends TypertRemoteService {
       try {
         privateKeyToAccount(privateKey as Hex)
       } catch {
-        throw new X402Error('invalid-wallet', '导入的私钥无效。')
+        throw new X402Error('invalid-wallet', 'The imported private key is invalid.')
       }
       key = privateKey
     }
@@ -300,7 +304,7 @@ export class X402Service extends TypertRemoteService {
   @Remote('selectWallet')
   async selectWallet(id: string): Promise<{ ok: true }> {
     const store = this.requireWalletStore()
-    if ((await store.get(id)) === undefined) throw new X402Error('wallet-not-found', `x402: 未知的钱包 ${id}`)
+    if ((await store.get(id)) === undefined) throw new X402Error('wallet-not-found', `x402: unknown wallet ${id}`)
     await store.setCurrent(id)
     return { ok: true }
   }
@@ -314,7 +318,7 @@ export class X402Service extends TypertRemoteService {
   async send(request: { to: string; amountUsdc: string }): Promise<X402SendReceipt> {
     await this.requireCurrentWallet()
     const to = request.to.trim()
-    if (!isAddress(to)) throw new X402Error('invalid-wallet', `无效的收款地址 "${request.to}"。`)
+    if (!isAddress(to)) throw new X402Error('invalid-wallet', `Invalid recipient address "${request.to}".`)
     const { transaction } = await this.protocol.send(to, request.amountUsdc)
     return { transaction, to, amountUsdc: request.amountUsdc, status: 'confirmed' }
   }
@@ -360,18 +364,18 @@ export class X402Service extends TypertRemoteService {
         agent: request.agent,
         toolName: 'x402_pay',
         ...(request.callId === undefined ? {} : { callId: request.callId }),
-        reason: `x402 支付 ${requirement.amountUsdc} USDC 给 ${requirement.payTo}，用于 ${requirement.resource}`,
+        reason: `x402 pay ${requirement.amountUsdc} USDC to ${requirement.payTo} for ${requirement.resource}`,
         ...(request.signal === undefined ? {} : { signal: request.signal }),
       })
       if (outcome === 'rejected' || outcome === 'cancelled') {
-        throw new X402Error('rejected', 'x402 支付被拒绝，未发生任何扣款。')
+        throw new X402Error('rejected', 'The x402 payment was rejected; nothing was charged.')
       }
       if (outcome === 'unavailable') {
-        throw new X402Error('rejected', '没有可用的审批应答者，x402 支付已安全拒绝。')
+        throw new X402Error('rejected', 'No approval responder is available; the x402 payment was safely rejected.')
       }
     })
     if (receipt.paymentStatus === 'settled' || receipt.paymentStatus === 'settle_failed') {
-      this.record({
+      await this.record({
         url: request.url,
         amountUsdc: paidAmount,
         ...(receipt.transaction === undefined ? {} : { transaction: receipt.transaction }),
@@ -381,8 +385,16 @@ export class X402Service extends TypertRemoteService {
     return receipt
   }
 
-  /** Append one payment to the process-local ring and broadcast it to the GUI. */
-  private record(entry: Omit<X402PaymentRecord, 'id' | 'network' | 'time'>): void {
+  /** Reload the durable payment ring from the domain; the ring stays capped at the newest records. */
+  private restorePayments(table: KvTable<string, X402PaymentRecord>): void {
+    const rows = [...table.entries()].map(([, record]) => record).sort((a, b) => a.time - b.time)
+    this.records.push(...rows.slice(-MAX_RECORDS))
+    const ids = rows.map(record => Number(record.id.replace(/^x402-/, ''))).filter(Number.isFinite)
+    if (ids.length > 0) this.nextRecord = Math.max(...ids) + 1
+  }
+
+  /** Append one payment to the ring, persist it, and broadcast it to the GUI. */
+  private async record(entry: Omit<X402PaymentRecord, 'id' | 'network' | 'time'>): Promise<void> {
     const record: X402PaymentRecord = {
       ...entry,
       id: `x402-${this.nextRecord++}`,
@@ -390,7 +402,18 @@ export class X402Service extends TypertRemoteService {
       time: Date.now(),
     }
     this.records.push(record)
-    if (this.records.length > MAX_RECORDS) this.records.shift()
+    const evicted = this.records.length > MAX_RECORDS ? this.records.shift() : undefined
+    const table = this.paymentsTable
+    if (table !== undefined) {
+      // Persistence is best-effort: a failed write must not fail the paid call.
+      try {
+        await table.put(record.id, record)
+        /* v8 ignore next 2 -- eviction with a live table needs 101 real paid calls; the in-memory depth cap covers the shift logic. */
+        if (evicted !== undefined) await table.delete(evicted.id)
+      } catch {
+        // Storage is down — the in-memory ring and the session log still hold the record.
+      }
+    }
     this.ctx.emit('x402/payment', record)
   }
 }

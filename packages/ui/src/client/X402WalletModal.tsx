@@ -1,13 +1,14 @@
 /** Phantom-style wallet popup: balance hero, send/receive, activity, and the wallet switcher. */
 
-import { useState } from 'react'
-import type { FormEvent } from 'react'
+import { useEffect, useState } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import QRCode from 'react-qr-code'
 import {
   IconCheckOutline16, IconChevronDownOutline14, IconCloseOutline16, IconCopyOutline16,
   IconPlusOutline16, IconRefreshOutline16, IconSendOutline16, Modal, writeClipboard,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { X402HistoryEntry, X402PaymentRecord, X402WalletRecord, X402WalletState } from '@danielng23/dsh-x402/types'
+import { explorerTxUrl } from './explorer.ts'
 import type { X402CreateForm, X402SendForm, X402WalletView } from './store.ts'
 import type { X402ModalFace } from './slots.ts'
 import type { X402WalletEntryProps } from './X402WalletEntry.tsx'
@@ -26,8 +27,26 @@ export function shortAddress(address: string): string {
   return address.length <= 12 ? address : `${address.slice(0, 6)}…${address.slice(-4)}`
 }
 
+/** Wrap children in a block-explorer link when the network is known. */
+function TxLink({ network, hash, children }: {
+  network: string
+  hash: string
+  children: ReactNode
+}) {
+  const url = explorerTxUrl(network, hash)
+  if (url === undefined) return <>{children}</>
+  return (
+    <a className={css.txLink} href={url} target="_blank" rel="noreferrer" title={hash}>
+      {children}
+    </a>
+  )
+}
+
 /** How long the transient copy label stays visible, in ms. */
 const COPIED_MS = 1000
+
+/** Receive-screen balance polling interval, in ms. */
+const RECEIVE_POLL_MS = 5000
 
 /** Render the balance hero and the send/receive actions. */
 function MainView({ wallet, history, payments, t, onSend, onReceive, onCreate }: {
@@ -77,7 +96,9 @@ function MainView({ wallet, history, payments, t, onSend, onReceive, onCreate }:
             <span className={css.activityMeta}>
               {entry.direction === 'out' ? t('main.send') : t('main.receive')} · {shortAddress(entry.direction === 'out' ? entry.to : entry.from)}
             </span>
-            <span className={css.activityBlock}>{entry.blockNumber}</span>
+            <TxLink network={wallet.network} hash={entry.hash}>
+              <span className={css.activityBlock}>#{entry.blockNumber}</span>
+            </TxLink>
           </li>
         ))}
       </ul>
@@ -125,11 +146,12 @@ function ReceiveView({ wallet, t }: { wallet: X402WalletState | null; t: X402Wal
 }
 
 /** Render the send view: recipient + amount, then the confirmed receipt. */
-function SendView({ form, t, face, actions }: {
+function SendView({ form, t, face, actions, network }: {
   form: X402SendForm
   t: X402WalletEntryProps['t']
   face: X402ModalFace
   actions: X402WalletEntryProps['actions']
+  network: string
 }) {
   const submit = (event: FormEvent): void => {
     event.preventDefault()
@@ -147,7 +169,9 @@ function SendView({ form, t, face, actions }: {
         <span className={css.receiptIcon}><IconCheckOutline16 /></span>
         <div className={css.receiptTitle}>{t('send.confirmed')}</div>
         <div className={css.receiptMeta}>{t('send.transaction')}</div>
-        <code className={css.tx}>{form.done.transaction}</code>
+        <TxLink network={network} hash={form.done.transaction}>
+          <code className={css.tx}>{form.done.transaction}</code>
+        </TxLink>
         <div className={css.receiptMeta}>{form.done.amountUsdc} USDC → {shortAddress(form.done.to)}</div>
         <button
           type="button"
@@ -287,6 +311,15 @@ export function X402WalletModal({ useStore, actions, face, t }: X402WalletModalP
   const close = (): void => { actions.setOpen(false) }
   const goMain = (): void => { actions.setView({ kind: 'main' }); setSwitcher(false) }
   const view: X402WalletView = state.view
+
+  // While the receive screen is open, poll so funds landing on-chain show up
+  // without a manual refresh.
+  useEffect(() => {
+    if (!state.open || view.kind !== 'receive') return
+    const timer = window.setInterval(() => { void face.refresh() }, RECEIVE_POLL_MS)
+    return () => { window.clearInterval(timer) }
+  }, [state.open, view.kind, face])
+
   return (
     <Modal open={state.open} onClose={close} title={t('modal.title')} closeLabel={t('modal.close')} headless className={css.dialog as string}>
       <div className={css.shell}>
@@ -338,7 +371,7 @@ export function X402WalletModal({ useStore, actions, face, t }: X402WalletModalP
           />
         )}
         {view.kind === 'receive' && <ReceiveView wallet={state.wallet} t={t} />}
-        {view.kind === 'send' && <SendView form={state.sendForm} t={t} face={face} actions={actions} />}
+        {view.kind === 'send' && <SendView form={state.sendForm} t={t} face={face} actions={actions} network={state.wallet?.network ?? ''} />}
         {view.kind === 'create' && <CreateView form={state.createForm} t={t} face={face} actions={actions} />}
       </div>
     </Modal>

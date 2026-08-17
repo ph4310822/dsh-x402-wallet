@@ -298,6 +298,16 @@
   font-variant-numeric: tabular-nums;
 }
 
+.txLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.txLink:hover {
+  color: var(--dsw-alias-label-primary-bluish);
+  text-decoration: underline;
+}
+
 .receive {
   display: flex;
   flex-direction: column;

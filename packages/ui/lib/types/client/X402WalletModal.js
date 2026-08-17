@@ -1,15 +1,25 @@
-import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 /** Phantom-style wallet popup: balance hero, send/receive, activity, and the wallet switcher. */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 import { IconCheckOutline16, IconChevronDownOutline14, IconCloseOutline16, IconCopyOutline16, IconPlusOutline16, IconRefreshOutline16, IconSendOutline16, Modal, writeClipboard, } from '@deepseek-ai/dsh-client-ui-primitives';
+import { explorerTxUrl } from "./explorer.js";
 import css from './X402WalletModal.module.css';
 /** Truncate an address to a displayable short form. */
 export function shortAddress(address) {
     return address.length <= 12 ? address : `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
+/** Wrap children in a block-explorer link when the network is known. */
+function TxLink({ network, hash, children }) {
+    const url = explorerTxUrl(network, hash);
+    if (url === undefined)
+        return _jsx(_Fragment, { children: children });
+    return (_jsx("a", { className: css.txLink, href: url, target: "_blank", rel: "noreferrer", title: hash, children: children }));
+}
 /** How long the transient copy label stays visible, in ms. */
 const COPIED_MS = 1000;
+/** Receive-screen balance polling interval, in ms. */
+const RECEIVE_POLL_MS = 5000;
 /** Render the balance hero and the send/receive actions. */
 function MainView({ wallet, history, payments, t, onSend, onReceive, onCreate }) {
     if (wallet === null)
@@ -17,7 +27,7 @@ function MainView({ wallet, history, payments, t, onSend, onReceive, onCreate })
     if (!wallet.configured) {
         return (_jsxs("div", { className: css.empty, children: [_jsx("div", { className: css.emptyTitle, children: t('main.empty') }), _jsx("div", { className: css.emptyHint, children: t('main.emptyHint') }), _jsx("button", { type: "button", className: css.primary, onClick: onCreate, children: t('main.create') })] }));
     }
-    return (_jsxs("div", { className: css.main, children: [_jsxs("div", { className: css.hero, children: [_jsx("div", { className: css.heroLabel, children: t('main.balance') }), _jsx("div", { className: css.heroAmount, children: wallet.usdcBalance ?? '--' }), _jsx("div", { className: css.heroUnit, children: "USDC" })] }), _jsxs("div", { className: css.actions, children: [_jsxs("button", { type: "button", className: css.action, onClick: onSend, children: [_jsx(IconSendOutline16, {}), t('main.send')] }), _jsxs("button", { type: "button", className: css.action, onClick: onReceive, children: [_jsx(IconPlusOutline16, {}), t('main.receive')] })] }), _jsx("div", { className: css.sectionTitle, children: t('main.assets') }), _jsxs("div", { className: css.tokenRow, children: [_jsx("span", { className: css.tokenBadge, children: "$" }), _jsx("span", { className: css.tokenName, children: "USDC" }), _jsx("span", { className: css.tokenAmount, children: wallet.usdcBalance ?? '--' })] }), _jsx("div", { className: css.sectionTitle, children: t('main.activity') }), history.length === 0 && _jsx("div", { className: css.center, children: t('main.activityEmpty') }), _jsx("ul", { className: css.activity, children: history.map(entry => (_jsxs("li", { className: css.activityRow, children: [_jsxs("span", { className: entry.direction === 'out' ? css.amountOut : css.amountIn, children: [entry.direction === 'out' ? '−' : '+', entry.amountUsdc] }), _jsxs("span", { className: css.activityMeta, children: [entry.direction === 'out' ? t('main.send') : t('main.receive'), " \u00B7 ", shortAddress(entry.direction === 'out' ? entry.to : entry.from)] }), _jsx("span", { className: css.activityBlock, children: entry.blockNumber })] }, entry.hash))) }), _jsx("div", { className: css.sectionTitle, children: t('main.payments') }), payments.length === 0 && _jsx("div", { className: css.center, children: t('main.paymentsEmpty') }), _jsx("ul", { className: css.activity, children: payments.slice(0, 6).map(payment => (_jsxs("li", { className: css.activityRow, children: [_jsxs("span", { className: payment.status === 'settled' ? css.amountOut : css.amountIn, children: ["\u2212", payment.amountUsdc] }), _jsxs("span", { className: css.activityMeta, children: [payment.status === 'settled' ? t('history.settled') : t('history.failed'), " \u00B7 ", payment.url] }), _jsx("span", { className: css.activityBlock, children: payment.network })] }, payment.id))) })] }));
+    return (_jsxs("div", { className: css.main, children: [_jsxs("div", { className: css.hero, children: [_jsx("div", { className: css.heroLabel, children: t('main.balance') }), _jsx("div", { className: css.heroAmount, children: wallet.usdcBalance ?? '--' }), _jsx("div", { className: css.heroUnit, children: "USDC" })] }), _jsxs("div", { className: css.actions, children: [_jsxs("button", { type: "button", className: css.action, onClick: onSend, children: [_jsx(IconSendOutline16, {}), t('main.send')] }), _jsxs("button", { type: "button", className: css.action, onClick: onReceive, children: [_jsx(IconPlusOutline16, {}), t('main.receive')] })] }), _jsx("div", { className: css.sectionTitle, children: t('main.assets') }), _jsxs("div", { className: css.tokenRow, children: [_jsx("span", { className: css.tokenBadge, children: "$" }), _jsx("span", { className: css.tokenName, children: "USDC" }), _jsx("span", { className: css.tokenAmount, children: wallet.usdcBalance ?? '--' })] }), _jsx("div", { className: css.sectionTitle, children: t('main.activity') }), history.length === 0 && _jsx("div", { className: css.center, children: t('main.activityEmpty') }), _jsx("ul", { className: css.activity, children: history.map(entry => (_jsxs("li", { className: css.activityRow, children: [_jsxs("span", { className: entry.direction === 'out' ? css.amountOut : css.amountIn, children: [entry.direction === 'out' ? '−' : '+', entry.amountUsdc] }), _jsxs("span", { className: css.activityMeta, children: [entry.direction === 'out' ? t('main.send') : t('main.receive'), " \u00B7 ", shortAddress(entry.direction === 'out' ? entry.to : entry.from)] }), _jsx(TxLink, { network: wallet.network, hash: entry.hash, children: _jsxs("span", { className: css.activityBlock, children: ["#", entry.blockNumber] }) })] }, entry.hash))) }), _jsx("div", { className: css.sectionTitle, children: t('main.payments') }), payments.length === 0 && _jsx("div", { className: css.center, children: t('main.paymentsEmpty') }), _jsx("ul", { className: css.activity, children: payments.slice(0, 6).map(payment => (_jsxs("li", { className: css.activityRow, children: [_jsxs("span", { className: payment.status === 'settled' ? css.amountOut : css.amountIn, children: ["\u2212", payment.amountUsdc] }), _jsxs("span", { className: css.activityMeta, children: [payment.status === 'settled' ? t('history.settled') : t('history.failed'), " \u00B7 ", payment.url] }), _jsx("span", { className: css.activityBlock, children: payment.network })] }, payment.id))) })] }));
 }
 /** Render the receive view: full address, QR code, and copy. */
 function ReceiveView({ wallet, t }) {
@@ -36,7 +46,7 @@ function ReceiveView({ wallet, t }) {
                     : _jsxs(_Fragment, { children: [_jsx(IconCopyOutline16, {}), t('receive.copy')] }) }), _jsx("div", { className: css.hint, children: t('receive.hint', { network: wallet?.network ?? '' }) })] }));
 }
 /** Render the send view: recipient + amount, then the confirmed receipt. */
-function SendView({ form, t, face, actions }) {
+function SendView({ form, t, face, actions, network }) {
     const submit = (event) => {
         event.preventDefault();
         if (form.busy)
@@ -49,7 +59,7 @@ function SendView({ form, t, face, actions }) {
         void face.send(form.to.trim(), form.amount.trim());
     };
     if (form.done !== null) {
-        return (_jsxs("div", { className: css.receipt, children: [_jsx("span", { className: css.receiptIcon, children: _jsx(IconCheckOutline16, {}) }), _jsx("div", { className: css.receiptTitle, children: t('send.confirmed') }), _jsx("div", { className: css.receiptMeta, children: t('send.transaction') }), _jsx("code", { className: css.tx, children: form.done.transaction }), _jsxs("div", { className: css.receiptMeta, children: [form.done.amountUsdc, " USDC \u2192 ", shortAddress(form.done.to)] }), _jsx("button", { type: "button", className: css.primary, onClick: () => { actions.resetSendForm(); actions.setView({ kind: 'main' }); }, children: t('send.done') })] }));
+        return (_jsxs("div", { className: css.receipt, children: [_jsx("span", { className: css.receiptIcon, children: _jsx(IconCheckOutline16, {}) }), _jsx("div", { className: css.receiptTitle, children: t('send.confirmed') }), _jsx("div", { className: css.receiptMeta, children: t('send.transaction') }), _jsx(TxLink, { network: network, hash: form.done.transaction, children: _jsx("code", { className: css.tx, children: form.done.transaction }) }), _jsxs("div", { className: css.receiptMeta, children: [form.done.amountUsdc, " USDC \u2192 ", shortAddress(form.done.to)] }), _jsx("button", { type: "button", className: css.primary, onClick: () => { actions.resetSendForm(); actions.setView({ kind: 'main' }); }, children: t('send.done') })] }));
     }
     return (_jsxs("form", { className: css.form, onSubmit: submit, children: [_jsxs("label", { className: css.field, children: [_jsx("span", { className: css.fieldLabel, children: t('send.to') }), _jsx("input", { className: css.input, value: form.to, placeholder: t('send.toPlaceholder'), onChange: (event) => { actions.patchSendForm({ to: event.target.value }); } })] }), _jsxs("label", { className: css.field, children: [_jsx("span", { className: css.fieldLabel, children: t('send.amount') }), _jsx("input", { className: css.input, type: "number", min: "0", step: "any", value: form.amount, placeholder: t('send.amountPlaceholder'), onChange: (event) => { actions.patchSendForm({ amount: event.target.value }); } })] }), form.error !== null && _jsx("div", { className: css.error, children: form.error }), _jsx("button", { type: "submit", className: css.primary, disabled: form.busy, children: form.busy ? t('send.busy') : t('send.submit') })] }));
 }
@@ -75,6 +85,14 @@ export function X402WalletModal({ useStore, actions, face, t }) {
     const close = () => { actions.setOpen(false); };
     const goMain = () => { actions.setView({ kind: 'main' }); setSwitcher(false); };
     const view = state.view;
+    // While the receive screen is open, poll so funds landing on-chain show up
+    // without a manual refresh.
+    useEffect(() => {
+        if (!state.open || view.kind !== 'receive')
+            return;
+        const timer = window.setInterval(() => { void face.refresh(); }, RECEIVE_POLL_MS);
+        return () => { window.clearInterval(timer); };
+    }, [state.open, view.kind, face]);
     return (_jsx(Modal, { open: state.open, onClose: close, title: t('modal.title'), closeLabel: t('modal.close'), headless: true, className: css.dialog, children: _jsxs("div", { className: css.shell, children: [_jsxs("header", { className: css.header, children: [view.kind === 'main'
                             ? (_jsxs("button", { type: "button", className: css.walletButton, onClick: () => { setSwitcher(value => !value); }, "aria-expanded": switcher, children: [_jsx("span", { className: css.headerName, children: state.wallet?.configured === true
                                             ? (state.wallet.label ?? shortAddress(state.wallet.address ?? ''))
@@ -82,6 +100,6 @@ export function X402WalletModal({ useStore, actions, face, t }) {
                             : _jsx("button", { type: "button", className: css.back, onClick: goMain, children: t('common.back') }), _jsxs("span", { className: css.headerTools, children: [_jsx("button", { type: "button", className: css.close, "aria-label": t('action.refresh'), onClick: () => { void face.refresh(); }, children: _jsx(IconRefreshOutline16, {}) }), _jsx("button", { type: "button", className: css.close, "aria-label": t('modal.close'), onClick: close, children: _jsx(IconCloseOutline16, {}) })] })] }), state.error !== null && _jsx("div", { className: css.error, children: t('modal.error', { message: state.error }) }), switcher && view.kind === 'main' && (_jsx(WalletList, { wallets: state.wallets, t: t, onPick: (id) => {
                         setSwitcher(false);
                         void face.selectWallet(id);
-                    }, onNew: () => { setSwitcher(false); actions.setView({ kind: 'create' }); } })), view.kind === 'main' && (_jsx(MainView, { wallet: state.wallet, history: state.history, payments: state.payments, t: t, onSend: () => { actions.setView({ kind: 'send' }); }, onReceive: () => { actions.setView({ kind: 'receive' }); }, onCreate: () => { actions.setView({ kind: 'create' }); } })), view.kind === 'receive' && _jsx(ReceiveView, { wallet: state.wallet, t: t }), view.kind === 'send' && _jsx(SendView, { form: state.sendForm, t: t, face: face, actions: actions }), view.kind === 'create' && _jsx(CreateView, { form: state.createForm, t: t, face: face, actions: actions })] }) }));
+                    }, onNew: () => { setSwitcher(false); actions.setView({ kind: 'create' }); } })), view.kind === 'main' && (_jsx(MainView, { wallet: state.wallet, history: state.history, payments: state.payments, t: t, onSend: () => { actions.setView({ kind: 'send' }); }, onReceive: () => { actions.setView({ kind: 'receive' }); }, onCreate: () => { actions.setView({ kind: 'create' }); } })), view.kind === 'receive' && _jsx(ReceiveView, { wallet: state.wallet, t: t }), view.kind === 'send' && _jsx(SendView, { form: state.sendForm, t: t, face: face, actions: actions, network: state.wallet?.network ?? '' }), view.kind === 'create' && _jsx(CreateView, { form: state.createForm, t: t, face: face, actions: actions })] }) }));
 }
 //# sourceMappingURL=X402WalletModal.js.map

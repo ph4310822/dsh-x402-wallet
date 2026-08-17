@@ -52,6 +52,7 @@ export declare class X402Service extends TypertRemoteService {
     private readonly records;
     private nextRecord;
     private walletStore;
+    private paymentsTable;
     /**
      * @param ctx - Host context carrying tools, credentials, approval, and system-prompt services.
      * @param config - Loader-validated deployment configuration.
@@ -140,7 +141,9 @@ export declare class X402Service extends TypertRemoteService {
         callId?: CallId;
         signal?: AbortSignal;
     }): Promise<X402PaymentReceipt>;
-    /** Append one payment to the process-local ring and broadcast it to the GUI. */
+    /** Reload the durable payment ring from the domain; the ring stays capped at the newest records. */
+    private restorePayments;
+    /** Append one payment to the ring, persist it, and broadcast it to the GUI. */
     private record;
 }
 export { createX402Protocol, X402Error, formatUsdc, parseUsdcAmount } from './protocol.ts';

@@ -6,7 +6,7 @@
  */
 import type { Address } from 'viem';
 import type { Domain } from '@deepseek-ai/dsh-storage-domain';
-import type { X402WalletRecord } from './types.ts';
+import type { X402PaymentRecord, X402WalletRecord } from './types.ts';
 /** One durable wallet row: public identity plus the credential reference of its key. */
 export interface X402Wallet {
     /** Opaque durable identity. */
@@ -29,6 +29,7 @@ export declare const x402WalletDomainSpec: {
         meta: import("@deepseek-ai/dsh-storage-domain").DomainTableSpec<string, {
             currentId: string;
         }>;
+        payments: import("@deepseek-ai/dsh-storage-domain").DomainTableSpec<string, X402PaymentRecord>;
     };
 };
 /** The durable wallet-registry surface the service and tests share. */
