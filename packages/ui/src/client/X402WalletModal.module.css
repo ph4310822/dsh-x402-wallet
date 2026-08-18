@@ -353,6 +353,12 @@
   text-align: center;
 }
 
+.faucet {
+  color: var(--dsw-alias-label-primary-bluish);
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .receipt {
   display: flex;
   flex-direction: column;
@@ -436,7 +442,7 @@
 
 .segmented {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   padding: 3px;
   border-radius: 10px;

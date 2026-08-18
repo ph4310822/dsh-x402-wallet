@@ -42,8 +42,8 @@ import { Service } from '@deepseek-ai/cordis';
 import s from '@deepseek-ai/schemastery';
 import { credentialRef } from '@deepseek-ai/dsh-credentials';
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol';
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { isAddress } from 'viem';
+import { generatePrivateKey, mnemonicToAccount, privateKeyToAccount } from 'viem/accounts';
+import { isAddress, toHex } from 'viem';
 import { createX402Protocol, X402Error } from "./protocol.js";
 import { X402_SYSTEM_PROMPT } from "./prompt.js";
 import { registerX402Tools } from "./tools.js";
@@ -89,6 +89,7 @@ let X402Service = (() => {
             approvalRequired: s.boolean().default(true),
             keyRef: s.string().default('X402_PRIVATE_KEY'),
             historyBlockRange: s.natural().min(1).max(1_000_000).default(200_000),
+            reconcileOnStart: s.boolean().default(true),
         });
         config = __runInitializers(this, _instanceExtraInitializers);
         protocol;
@@ -128,6 +129,72 @@ let X402Service = (() => {
                 this.paymentsTable = domain.table('payments');
                 this.restorePayments(this.paymentsTable);
                 await this.seedLegacyWallet();
+                if (this.config.reconcileOnStart) {
+                    void this.reconcilePayments().catch(() => { });
+                }
+            }
+        }
+        /**
+         * Backfill payment records for on-chain transfers that predate persistence:
+         * scan the current wallet's outgoing transfers and re-record the ones that
+         * went to a catalog payee. Best-effort — network or catalog failures leave
+         * the ring untouched.
+         */
+        async reconcilePayments() {
+            const store = this.walletStore;
+            /* v8 ignore next 1 -- init assigns both before reconciling; the guard is defensive. */
+            if (store === undefined || this.paymentsTable === undefined)
+                return;
+            let current;
+            try {
+                current = await this.requireCurrentWallet();
+            }
+            catch {
+                return;
+            }
+            const known = await this.catalogPayees();
+            if (known.size === 0)
+                return;
+            let transfers;
+            try {
+                transfers = await this.protocol.history(current.address, 100);
+            }
+            catch {
+                // RPC unreachable — reconciliation is best-effort.
+                return;
+            }
+            const existing = new Set(this.records.map(record => record.transaction).filter((tx) => tx !== undefined));
+            for (const entry of transfers) {
+                if (entry.direction !== 'out')
+                    continue;
+                if (!known.has(entry.to))
+                    continue;
+                if (existing.has(entry.hash))
+                    continue;
+                await this.record({
+                    url: 'recovered from chain',
+                    amountUsdc: entry.amountUsdc,
+                    transaction: entry.hash,
+                    status: 'settled',
+                });
+                existing.add(entry.hash);
+            }
+        }
+        /** The set of known x402 payee addresses from the discovery catalog. */
+        async catalogPayees() {
+            try {
+                const response = await this.fetchImpl(this.config.catalogUrl);
+                const catalog = await response.json();
+                const payees = new Set();
+                for (const service of catalog.services ?? []) {
+                    if (typeof service.pay_to === 'string')
+                        payees.add(service.pay_to.toLowerCase());
+                }
+                return payees;
+            }
+            catch {
+                // Catalog unreachable — reconciliation skips.
+                return new Set();
             }
         }
         /** The durable wallet registry; unavailable only before init in direct constructions. */
@@ -269,8 +336,24 @@ let X402Service = (() => {
             const id = mintWalletId();
             const keyRef = keyRefOf(id);
             const privateKey = request.privateKey?.trim();
+            const mnemonic = request.mnemonic?.trim();
             let key;
-            if (privateKey === undefined || privateKey.length === 0) {
+            if (mnemonic !== undefined && mnemonic.length > 0) {
+                let account;
+                try {
+                    account = mnemonicToAccount(mnemonic);
+                }
+                catch {
+                    throw new X402Error('invalid-wallet', 'The imported mnemonic is invalid.');
+                }
+                const hdKey = account.getHdKey();
+                /* v8 ignore next 1 -- a valid mnemonic always yields a private key. */
+                if (hdKey.privateKey === null)
+                    throw new X402Error('invalid-wallet', 'The imported mnemonic is invalid.');
+                key = toHex(hdKey.privateKey);
+                await this.ctx.credentials.set(credentialRef(`${keyRef}_MNEMONIC`), mnemonic);
+            }
+            else if (privateKey === undefined || privateKey.length === 0) {
                 key = generatePrivateKey();
             }
             else {

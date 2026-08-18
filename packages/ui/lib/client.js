@@ -2754,6 +2754,11 @@ window.__ModuleLoader__.load({
 			"eip155:10": "https://optimistic.etherscan.io",
 			"eip155:42161": "https://arbiscan.io"
 		};
+		/** Known testnet faucets, keyed by CAIP-2 network. */
+		const FAUCETS = {
+			"eip155:84532": "https://www.coinbase.com/faucets/base-sepolia-faucet",
+			"eip155:11155111": "https://faucet.quicknode.com/ethereum/sepolia"
+		};
 		/**
 		* The block-explorer transaction URL for one network, when the network is known.
 		* @param network - CAIP-2 network identifier from the wallet snapshot.
@@ -2764,9 +2769,17 @@ window.__ModuleLoader__.load({
 			const base = EXPLORERS[network];
 			return base === void 0 ? void 0 : `${base}/tx/${hash}`;
 		}
+		/**
+		* A testnet faucet URL for one network, when the network has a known faucet.
+		* @param network - CAIP-2 network identifier from the wallet snapshot.
+		* @returns the faucet URL, or undefined for mainnets and unmapped networks.
+		*/
+		function faucetUrl(network) {
+			return FAUCETS[network];
+		}
 		//#endregion
 		//#region \0dsh-css:/Users/daniel/workspace/deepseek-harness/packages/client/ui-x402/src/client/X402WalletModal.module.css.mjs
-		const css$2 = ".GSt5_W_dialog{border-radius:16px;width:340px;max-width:calc(100vw - 32px)}.GSt5_W_shell{flex-direction:column;gap:10px;max-height:70vh;padding:14px;display:flex;overflow-y:auto}.GSt5_W_header{justify-content:space-between;align-items:center;gap:8px;display:flex}.GSt5_W_walletButton{cursor:pointer;color:var(--dsw-alias-label-primary);text-align:left;background:0 0;border:none;border-radius:10px;flex-direction:column;align-items:flex-start;gap:2px;padding:6px 8px;display:flex}.GSt5_W_walletButton:hover{background:var(--dsw-alias-interactive-bg-hover)}.GSt5_W_headerName{text-overflow:ellipsis;white-space:nowrap;max-width:200px;font-size:13px;font-weight:600;overflow:hidden}.GSt5_W_headerNetwork{color:var(--dsw-alias-label-tertiary);align-items:center;gap:2px;font-size:11px;display:inline-flex}.GSt5_W_back{cursor:pointer;color:var(--dsw-alias-label-secondary);background:0 0;border:none;border-radius:8px;padding:6px 8px;font-size:12px}.GSt5_W_back:hover{background:var(--dsw-alias-interactive-bg-hover)}.GSt5_W_headerTools{align-items:center;gap:2px;display:inline-flex}.GSt5_W_close{cursor:pointer;width:28px;height:28px;color:var(--dsw-alias-label-secondary);background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;display:inline-flex}.GSt5_W_close:hover{background:var(--dsw-alias-interactive-bg-hover)}.GSt5_W_error{background:var(--dsw-alias-state-error-secondary);color:var(--dsw-static-neutral-bluish-00);word-break:break-all;border-radius:8px;padding:8px 10px;font-size:12px}.GSt5_W_center{color:var(--dsw-alias-label-tertiary);text-align:center;padding:10px 0;font-size:12px}.GSt5_W_empty{text-align:center;flex-direction:column;align-items:center;gap:10px;padding:28px 12px;display:flex}.GSt5_W_emptyTitle{color:var(--dsw-alias-label-primary);font-size:15px;font-weight:600}.GSt5_W_emptyHint{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:1.6}.GSt5_W_primary{background:var(--dsw-alias-button-primary-fill);width:100%;color:var(--dsw-alias-label-primary-inverted);cursor:pointer;border:none;border-radius:10px;justify-content:center;align-items:center;gap:6px;margin-top:4px;padding:10px 12px;font-size:13px;font-weight:600;display:inline-flex}.GSt5_W_primary:hover{background:var(--dsw-alias-button-primary-hover)}.GSt5_W_primary:disabled{opacity:.6;cursor:default}.GSt5_W_main{flex-direction:column;gap:8px;display:flex}.GSt5_W_hero{flex-direction:column;align-items:center;gap:2px;padding:16px 0 12px;display:flex}.GSt5_W_heroLabel{color:var(--dsw-alias-label-tertiary);font-size:11px}.GSt5_W_heroAmount{font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-primary);font-size:34px;font-weight:700;line-height:1.1}.GSt5_W_heroUnit{color:var(--dsw-alias-label-secondary);font-size:12px}.GSt5_W_actions{grid-template-columns:1fr 1fr;gap:8px;display:grid}.GSt5_W_action{background:var(--dsw-alias-interactive-bg-active);cursor:pointer;color:var(--dsw-alias-label-primary);border:none;border-radius:10px;justify-content:center;align-items:center;gap:6px;padding:10px;font-size:13px;font-weight:600;display:inline-flex}.GSt5_W_action:hover{background:var(--dsw-alias-interactive-bg-hover-solid)}.GSt5_W_sectionTitle{color:var(--dsw-alias-label-tertiary);text-transform:uppercase;letter-spacing:.04em;margin-top:6px;font-size:11px;font-weight:600}.GSt5_W_tokenRow{border:1px solid var(--dsw-alias-border-l);border-radius:10px;align-items:center;gap:8px;padding:8px 10px;display:flex}.GSt5_W_tokenBadge{background:var(--dsw-alias-interactive-bg-active);width:22px;height:22px;color:var(--dsw-alias-label-secondary);border-radius:50%;justify-content:center;align-items:center;font-size:12px;font-weight:700;display:inline-flex}.GSt5_W_tokenName{flex:1;font-size:13px;font-weight:600}.GSt5_W_tokenAmount{font-variant-numeric:tabular-nums;font-size:13px}.GSt5_W_activity{flex-direction:column;margin:0;padding:0;list-style:none;display:flex}.GSt5_W_activityRow{border-bottom:1px solid var(--dsw-alias-border-l);grid-template-columns:auto 1fr auto;align-items:center;gap:8px;padding:8px 4px;font-size:12px;display:grid}.GSt5_W_activityRow:last-child{border-bottom:none}.GSt5_W_amountOut{color:var(--dsw-alias-state-error-primary);font-variant-numeric:tabular-nums}.GSt5_W_amountIn{color:var(--dsw-alias-state-success-primary);font-variant-numeric:tabular-nums}.GSt5_W_activityMeta{color:var(--dsw-alias-label-secondary);text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.GSt5_W_activityBlock{color:var(--dsw-alias-label-tertiary);font-variant-numeric:tabular-nums}.GSt5_W_txLink{color:inherit;text-decoration:none}.GSt5_W_txLink:hover{color:var(--dsw-alias-label-primary-bluish);text-decoration:underline}.GSt5_W_receive{flex-direction:column;align-items:center;gap:10px;padding:14px 0 6px;display:flex}.GSt5_W_qrWrap{border:1px solid var(--dsw-alias-border-l);background:var(--dsw-alias-bg-base);border-radius:12px;padding:10px}.GSt5_W_addressLabel{color:var(--dsw-alias-label-tertiary);font-size:11px}.GSt5_W_address{background:var(--dsw-alias-interactive-bg-active);width:100%;color:var(--dsw-alias-label-primary);font-family:var(--dsw-font-mono);word-break:break-all;text-align:center;border-radius:8px;padding:8px 10px;font-size:11px}.GSt5_W_copyOk{align-items:center;gap:6px;display:inline-flex}.GSt5_W_hint{color:var(--dsw-alias-label-tertiary);text-align:center;font-size:11px;line-height:1.6}.GSt5_W_receipt{text-align:center;flex-direction:column;align-items:center;gap:8px;padding:20px 6px 6px;display:flex}.GSt5_W_receiptIcon{background:var(--dsw-alias-state-success-secondary);width:44px;height:44px;color:var(--dsw-alias-state-success-primary);border-radius:50%;justify-content:center;align-items:center;display:inline-flex}.GSt5_W_receiptTitle{font-size:15px;font-weight:600}.GSt5_W_receiptMeta{color:var(--dsw-alias-label-tertiary);font-size:11px}.GSt5_W_tx{background:var(--dsw-alias-interactive-bg-active);width:100%;color:var(--dsw-alias-label-primary);font-family:var(--dsw-font-mono);word-break:break-all;border-radius:8px;padding:8px 10px;font-size:11px}.GSt5_W_form{flex-direction:column;gap:10px;display:flex}.GSt5_W_field{flex-direction:column;gap:4px;display:flex}.GSt5_W_fieldLabel{color:var(--dsw-alias-label-secondary);font-size:12px}.GSt5_W_input,.GSt5_W_textarea{border:1px solid var(--dsw-alias-border-l);background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);border-radius:10px;outline:none;padding:9px 10px;font-size:13px}.GSt5_W_input:focus,.GSt5_W_textarea:focus{border-color:var(--dsw-alias-button-primary-fill)}.GSt5_W_textarea{resize:vertical;min-height:64px;font-family:var(--dsw-font-mono);font-size:11px}.GSt5_W_segmented{background:var(--dsw-alias-interactive-bg-active);border-radius:10px;grid-template-columns:1fr 1fr;gap:4px;padding:3px;display:grid}.GSt5_W_segment,.GSt5_W_segmentActive{cursor:pointer;color:var(--dsw-alias-label-secondary);background:0 0;border:none;border-radius:8px;padding:7px;font-size:12px}.GSt5_W_segmentActive{background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);font-weight:600}.GSt5_W_switcher{border:1px solid var(--dsw-alias-border-l);border-radius:12px;flex-direction:column;gap:4px;padding:6px;display:flex}.GSt5_W_switcherTitle{color:var(--dsw-alias-label-tertiary);padding:4px 8px;font-size:11px}.GSt5_W_switcherList{flex-direction:column;margin:0;padding:0;list-style:none;display:flex}.GSt5_W_walletRow{cursor:pointer;width:100%;color:var(--dsw-alias-label-primary);text-align:left;background:0 0;border:none;border-radius:8px;justify-content:space-between;align-items:center;gap:8px;padding:8px;display:flex}.GSt5_W_walletRow:hover{background:var(--dsw-alias-interactive-bg-hover)}.GSt5_W_walletMeta{flex-direction:column;gap:2px;min-width:0;display:flex}.GSt5_W_walletLabel{text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;overflow:hidden}.GSt5_W_walletAddress{color:var(--dsw-alias-label-tertiary);font-family:var(--dsw-font-mono);font-size:11px}.GSt5_W_currentBadge{background:var(--dsw-alias-button-primary-dimmed);color:var(--dsw-alias-button-primary-fill);white-space:nowrap;border-radius:999px;padding:2px 8px;font-size:11px}.GSt5_W_newWallet{border:1px dashed var(--dsw-alias-border-l);cursor:pointer;color:var(--dsw-alias-label-secondary);background:0 0;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:8px;font-size:12px;display:inline-flex}.GSt5_W_newWallet:hover{background:var(--dsw-alias-interactive-bg-hover)}";
+		const css$2 = ".GSt5_W_dialog{border-radius:16px;width:340px;max-width:calc(100vw - 32px)}.GSt5_W_shell{flex-direction:column;gap:10px;max-height:70vh;padding:14px;display:flex;overflow-y:auto}.GSt5_W_header{justify-content:space-between;align-items:center;gap:8px;display:flex}.GSt5_W_walletButton{cursor:pointer;color:var(--dsw-alias-label-primary);text-align:left;background:0 0;border:none;border-radius:10px;flex-direction:column;align-items:flex-start;gap:2px;padding:6px 8px;display:flex}.GSt5_W_walletButton:hover{background:var(--dsw-alias-interactive-bg-hover)}.GSt5_W_headerName{text-overflow:ellipsis;white-space:nowrap;max-width:200px;font-size:13px;font-weight:600;overflow:hidden}.GSt5_W_headerNetwork{color:var(--dsw-alias-label-tertiary);align-items:center;gap:2px;font-size:11px;display:inline-flex}.GSt5_W_back{cursor:pointer;color:var(--dsw-alias-label-secondary);background:0 0;border:none;border-radius:8px;padding:6px 8px;font-size:12px}.GSt5_W_back:hover{background:var(--dsw-alias-interactive-bg-hover)}.GSt5_W_headerTools{align-items:center;gap:2px;display:inline-flex}.GSt5_W_close{cursor:pointer;width:28px;height:28px;color:var(--dsw-alias-label-secondary);background:0 0;border:none;border-radius:8px;justify-content:center;align-items:center;display:inline-flex}.GSt5_W_close:hover{background:var(--dsw-alias-interactive-bg-hover)}.GSt5_W_error{background:var(--dsw-alias-state-error-secondary);color:var(--dsw-static-neutral-bluish-00);word-break:break-all;border-radius:8px;padding:8px 10px;font-size:12px}.GSt5_W_center{color:var(--dsw-alias-label-tertiary);text-align:center;padding:10px 0;font-size:12px}.GSt5_W_empty{text-align:center;flex-direction:column;align-items:center;gap:10px;padding:28px 12px;display:flex}.GSt5_W_emptyTitle{color:var(--dsw-alias-label-primary);font-size:15px;font-weight:600}.GSt5_W_emptyHint{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:1.6}.GSt5_W_primary{background:var(--dsw-alias-button-primary-fill);width:100%;color:var(--dsw-alias-label-primary-inverted);cursor:pointer;border:none;border-radius:10px;justify-content:center;align-items:center;gap:6px;margin-top:4px;padding:10px 12px;font-size:13px;font-weight:600;display:inline-flex}.GSt5_W_primary:hover{background:var(--dsw-alias-button-primary-hover)}.GSt5_W_primary:disabled{opacity:.6;cursor:default}.GSt5_W_main{flex-direction:column;gap:8px;display:flex}.GSt5_W_hero{flex-direction:column;align-items:center;gap:2px;padding:16px 0 12px;display:flex}.GSt5_W_heroLabel{color:var(--dsw-alias-label-tertiary);font-size:11px}.GSt5_W_heroAmount{font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-primary);font-size:34px;font-weight:700;line-height:1.1}.GSt5_W_heroUnit{color:var(--dsw-alias-label-secondary);font-size:12px}.GSt5_W_actions{grid-template-columns:1fr 1fr;gap:8px;display:grid}.GSt5_W_action{background:var(--dsw-alias-interactive-bg-active);cursor:pointer;color:var(--dsw-alias-label-primary);border:none;border-radius:10px;justify-content:center;align-items:center;gap:6px;padding:10px;font-size:13px;font-weight:600;display:inline-flex}.GSt5_W_action:hover{background:var(--dsw-alias-interactive-bg-hover-solid)}.GSt5_W_sectionTitle{color:var(--dsw-alias-label-tertiary);text-transform:uppercase;letter-spacing:.04em;margin-top:6px;font-size:11px;font-weight:600}.GSt5_W_tokenRow{border:1px solid var(--dsw-alias-border-l);border-radius:10px;align-items:center;gap:8px;padding:8px 10px;display:flex}.GSt5_W_tokenBadge{background:var(--dsw-alias-interactive-bg-active);width:22px;height:22px;color:var(--dsw-alias-label-secondary);border-radius:50%;justify-content:center;align-items:center;font-size:12px;font-weight:700;display:inline-flex}.GSt5_W_tokenName{flex:1;font-size:13px;font-weight:600}.GSt5_W_tokenAmount{font-variant-numeric:tabular-nums;font-size:13px}.GSt5_W_activity{flex-direction:column;margin:0;padding:0;list-style:none;display:flex}.GSt5_W_activityRow{border-bottom:1px solid var(--dsw-alias-border-l);grid-template-columns:auto 1fr auto;align-items:center;gap:8px;padding:8px 4px;font-size:12px;display:grid}.GSt5_W_activityRow:last-child{border-bottom:none}.GSt5_W_amountOut{color:var(--dsw-alias-state-error-primary);font-variant-numeric:tabular-nums}.GSt5_W_amountIn{color:var(--dsw-alias-state-success-primary);font-variant-numeric:tabular-nums}.GSt5_W_activityMeta{color:var(--dsw-alias-label-secondary);text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.GSt5_W_activityBlock{color:var(--dsw-alias-label-tertiary);font-variant-numeric:tabular-nums}.GSt5_W_txLink{color:inherit;text-decoration:none}.GSt5_W_txLink:hover{color:var(--dsw-alias-label-primary-bluish);text-decoration:underline}.GSt5_W_receive{flex-direction:column;align-items:center;gap:10px;padding:14px 0 6px;display:flex}.GSt5_W_qrWrap{border:1px solid var(--dsw-alias-border-l);background:var(--dsw-alias-bg-base);border-radius:12px;padding:10px}.GSt5_W_addressLabel{color:var(--dsw-alias-label-tertiary);font-size:11px}.GSt5_W_address{background:var(--dsw-alias-interactive-bg-active);width:100%;color:var(--dsw-alias-label-primary);font-family:var(--dsw-font-mono);word-break:break-all;text-align:center;border-radius:8px;padding:8px 10px;font-size:11px}.GSt5_W_copyOk{align-items:center;gap:6px;display:inline-flex}.GSt5_W_hint{color:var(--dsw-alias-label-tertiary);text-align:center;font-size:11px;line-height:1.6}.GSt5_W_faucet{color:var(--dsw-alias-label-primary-bluish);font-size:12px;font-weight:600}.GSt5_W_receipt{text-align:center;flex-direction:column;align-items:center;gap:8px;padding:20px 6px 6px;display:flex}.GSt5_W_receiptIcon{background:var(--dsw-alias-state-success-secondary);width:44px;height:44px;color:var(--dsw-alias-state-success-primary);border-radius:50%;justify-content:center;align-items:center;display:inline-flex}.GSt5_W_receiptTitle{font-size:15px;font-weight:600}.GSt5_W_receiptMeta{color:var(--dsw-alias-label-tertiary);font-size:11px}.GSt5_W_tx{background:var(--dsw-alias-interactive-bg-active);width:100%;color:var(--dsw-alias-label-primary);font-family:var(--dsw-font-mono);word-break:break-all;border-radius:8px;padding:8px 10px;font-size:11px}.GSt5_W_form{flex-direction:column;gap:10px;display:flex}.GSt5_W_field{flex-direction:column;gap:4px;display:flex}.GSt5_W_fieldLabel{color:var(--dsw-alias-label-secondary);font-size:12px}.GSt5_W_input,.GSt5_W_textarea{border:1px solid var(--dsw-alias-border-l);background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);border-radius:10px;outline:none;padding:9px 10px;font-size:13px}.GSt5_W_input:focus,.GSt5_W_textarea:focus{border-color:var(--dsw-alias-button-primary-fill)}.GSt5_W_textarea{resize:vertical;min-height:64px;font-family:var(--dsw-font-mono);font-size:11px}.GSt5_W_segmented{background:var(--dsw-alias-interactive-bg-active);border-radius:10px;grid-template-columns:repeat(3,1fr);gap:4px;padding:3px;display:grid}.GSt5_W_segment,.GSt5_W_segmentActive{cursor:pointer;color:var(--dsw-alias-label-secondary);background:0 0;border:none;border-radius:8px;padding:7px;font-size:12px}.GSt5_W_segmentActive{background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);font-weight:600}.GSt5_W_switcher{border:1px solid var(--dsw-alias-border-l);border-radius:12px;flex-direction:column;gap:4px;padding:6px;display:flex}.GSt5_W_switcherTitle{color:var(--dsw-alias-label-tertiary);padding:4px 8px;font-size:11px}.GSt5_W_switcherList{flex-direction:column;margin:0;padding:0;list-style:none;display:flex}.GSt5_W_walletRow{cursor:pointer;width:100%;color:var(--dsw-alias-label-primary);text-align:left;background:0 0;border:none;border-radius:8px;justify-content:space-between;align-items:center;gap:8px;padding:8px;display:flex}.GSt5_W_walletRow:hover{background:var(--dsw-alias-interactive-bg-hover)}.GSt5_W_walletMeta{flex-direction:column;gap:2px;min-width:0;display:flex}.GSt5_W_walletLabel{text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;overflow:hidden}.GSt5_W_walletAddress{color:var(--dsw-alias-label-tertiary);font-family:var(--dsw-font-mono);font-size:11px}.GSt5_W_currentBadge{background:var(--dsw-alias-button-primary-dimmed);color:var(--dsw-alias-button-primary-fill);white-space:nowrap;border-radius:999px;padding:2px 8px;font-size:11px}.GSt5_W_newWallet{border:1px dashed var(--dsw-alias-border-l);cursor:pointer;color:var(--dsw-alias-label-secondary);background:0 0;border-radius:8px;justify-content:center;align-items:center;gap:6px;padding:8px;font-size:12px;display:inline-flex}.GSt5_W_newWallet:hover{background:var(--dsw-alias-interactive-bg-hover)}";
 		const tagId$2 = "@deepseek-ai/dsh-client-ui-x402/X402WalletModal.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$2) + "]") === null) {
 			const tag = document.createElement("style");
@@ -2776,68 +2789,69 @@ window.__ModuleLoader__.load({
 			document.head.appendChild(tag);
 		}
 		var X402WalletModal_module_css_default = {
-			"dialog": "GSt5_W_dialog",
-			"textarea": "GSt5_W_textarea",
+			"receive": "GSt5_W_receive",
+			"tokenBadge": "GSt5_W_tokenBadge",
+			"field": "GSt5_W_field",
+			"headerName": "GSt5_W_headerName",
 			"center": "GSt5_W_center",
-			"walletAddress": "GSt5_W_walletAddress",
-			"header": "GSt5_W_header",
-			"switcherList": "GSt5_W_switcherList",
-			"receiptTitle": "GSt5_W_receiptTitle",
-			"main": "GSt5_W_main",
-			"tokenRow": "GSt5_W_tokenRow",
-			"form": "GSt5_W_form",
-			"primary": "GSt5_W_primary",
-			"input": "GSt5_W_input",
-			"segmented": "GSt5_W_segmented",
-			"emptyTitle": "GSt5_W_emptyTitle",
+			"receipt": "GSt5_W_receipt",
 			"heroLabel": "GSt5_W_heroLabel",
+			"tokenName": "GSt5_W_tokenName",
+			"addressLabel": "GSt5_W_addressLabel",
+			"walletLabel": "GSt5_W_walletLabel",
+			"heroUnit": "GSt5_W_heroUnit",
+			"tokenAmount": "GSt5_W_tokenAmount",
+			"currentBadge": "GSt5_W_currentBadge",
+			"receiptMeta": "GSt5_W_receiptMeta",
+			"activityRow": "GSt5_W_activityRow",
+			"heroAmount": "GSt5_W_heroAmount",
+			"header": "GSt5_W_header",
 			"amountIn": "GSt5_W_amountIn",
 			"hint": "GSt5_W_hint",
-			"addressLabel": "GSt5_W_addressLabel",
-			"tokenName": "GSt5_W_tokenName",
-			"back": "GSt5_W_back",
-			"txLink": "GSt5_W_txLink",
-			"close": "GSt5_W_close",
-			"action": "GSt5_W_action",
-			"shell": "GSt5_W_shell",
-			"headerTools": "GSt5_W_headerTools",
-			"activityBlock": "GSt5_W_activityBlock",
-			"error": "GSt5_W_error",
-			"walletButton": "GSt5_W_walletButton",
-			"field": "GSt5_W_field",
-			"currentBadge": "GSt5_W_currentBadge",
-			"headerName": "GSt5_W_headerName",
-			"switcherTitle": "GSt5_W_switcherTitle",
-			"tokenAmount": "GSt5_W_tokenAmount",
-			"receive": "GSt5_W_receive",
-			"segmentActive": "GSt5_W_segmentActive",
-			"heroUnit": "GSt5_W_heroUnit",
-			"actions": "GSt5_W_actions",
-			"emptyHint": "GSt5_W_emptyHint",
-			"receiptIcon": "GSt5_W_receiptIcon",
-			"activityRow": "GSt5_W_activityRow",
-			"tokenBadge": "GSt5_W_tokenBadge",
-			"activity": "GSt5_W_activity",
-			"tx": "GSt5_W_tx",
-			"address": "GSt5_W_address",
-			"newWallet": "GSt5_W_newWallet",
-			"segment": "GSt5_W_segment",
-			"sectionTitle": "GSt5_W_sectionTitle",
-			"switcher": "GSt5_W_switcher",
-			"fieldLabel": "GSt5_W_fieldLabel",
-			"walletLabel": "GSt5_W_walletLabel",
-			"receipt": "GSt5_W_receipt",
-			"walletRow": "GSt5_W_walletRow",
-			"amountOut": "GSt5_W_amountOut",
-			"walletMeta": "GSt5_W_walletMeta",
-			"receiptMeta": "GSt5_W_receiptMeta",
-			"empty": "GSt5_W_empty",
-			"heroAmount": "GSt5_W_heroAmount",
-			"copyOk": "GSt5_W_copyOk",
-			"qrWrap": "GSt5_W_qrWrap",
+			"input": "GSt5_W_input",
 			"headerNetwork": "GSt5_W_headerNetwork",
-			"activityMeta": "GSt5_W_activityMeta",
-			"hero": "GSt5_W_hero"
+			"emptyTitle": "GSt5_W_emptyTitle",
+			"primary": "GSt5_W_primary",
+			"activityBlock": "GSt5_W_activityBlock",
+			"emptyHint": "GSt5_W_emptyHint",
+			"copyOk": "GSt5_W_copyOk",
+			"switcherList": "GSt5_W_switcherList",
+			"sectionTitle": "GSt5_W_sectionTitle",
+			"segmented": "GSt5_W_segmented",
+			"hero": "GSt5_W_hero",
+			"actions": "GSt5_W_actions",
+			"txLink": "GSt5_W_txLink",
+			"switcherTitle": "GSt5_W_switcherTitle",
+			"empty": "GSt5_W_empty",
+			"faucet": "GSt5_W_faucet",
+			"action": "GSt5_W_action",
+			"walletButton": "GSt5_W_walletButton",
+			"form": "GSt5_W_form",
+			"receiptTitle": "GSt5_W_receiptTitle",
+			"dialog": "GSt5_W_dialog",
+			"newWallet": "GSt5_W_newWallet",
+			"fieldLabel": "GSt5_W_fieldLabel",
+			"switcher": "GSt5_W_switcher",
+			"walletMeta": "GSt5_W_walletMeta",
+			"activity": "GSt5_W_activity",
+			"tokenRow": "GSt5_W_tokenRow",
+			"qrWrap": "GSt5_W_qrWrap",
+			"textarea": "GSt5_W_textarea",
+			"segment": "GSt5_W_segment",
+			"segmentActive": "GSt5_W_segmentActive",
+			"headerTools": "GSt5_W_headerTools",
+			"main": "GSt5_W_main",
+			"address": "GSt5_W_address",
+			"tx": "GSt5_W_tx",
+			"walletRow": "GSt5_W_walletRow",
+			"error": "GSt5_W_error",
+			"amountOut": "GSt5_W_amountOut",
+			"receiptIcon": "GSt5_W_receiptIcon",
+			"shell": "GSt5_W_shell",
+			"back": "GSt5_W_back",
+			"walletAddress": "GSt5_W_walletAddress",
+			"close": "GSt5_W_close",
+			"activityMeta": "GSt5_W_activityMeta"
 		};
 		//#endregion
 		//#region lib/types/client/X402WalletModal.js
@@ -3018,6 +3032,8 @@ window.__ModuleLoader__.load({
 		function ReceiveView({ wallet, t }) {
 			const [copied, setCopied] = (0, react.useState)(false);
 			const address = wallet?.configured === true ? wallet.address ?? "" : "";
+			const network = wallet?.network ?? "";
+			const faucet = faucetUrl(network);
 			const copy = () => {
 				(0, _deepseek_ai_dsh_client_ui_primitives.writeClipboard)(address).then((ok) => {
 					if (!ok || copied) return;
@@ -3058,7 +3074,14 @@ window.__ModuleLoader__.load({
 					}),
 					(0, react_jsx_runtime.jsx)("div", {
 						className: X402WalletModal_module_css_default.hint,
-						children: t("receive.hint", { network: wallet?.network ?? "" })
+						children: t("receive.hint", { network })
+					}),
+					faucet !== void 0 && (0, react_jsx_runtime.jsx)("a", {
+						className: X402WalletModal_module_css_default.faucet,
+						href: faucet,
+						target: "_blank",
+						rel: "noreferrer",
+						children: t("receive.faucet")
 					})
 				]
 			});
@@ -3171,7 +3194,8 @@ window.__ModuleLoader__.load({
 				event.preventDefault();
 				if (form.busy) return;
 				const key = form.privateKey.trim();
-				face.createWallet(form.label.trim(), form.importing && key !== "" ? key : void 0);
+				const mnemonic = form.mnemonic.trim();
+				face.createWallet(form.label.trim(), form.mode === "key" && key !== "" ? key : void 0, form.mode === "mnemonic" && mnemonic !== "" ? mnemonic : void 0);
 			};
 			return (0, react_jsx_runtime.jsxs)("form", {
 				className: X402WalletModal_module_css_default.form,
@@ -3193,23 +3217,34 @@ window.__ModuleLoader__.load({
 					}),
 					(0, react_jsx_runtime.jsxs)("div", {
 						className: X402WalletModal_module_css_default.segmented,
-						children: [(0, react_jsx_runtime.jsx)("button", {
-							type: "button",
-							className: form.importing ? X402WalletModal_module_css_default.segment : X402WalletModal_module_css_default.segmentActive,
-							onClick: () => {
-								actions.patchCreateForm({ importing: false });
-							},
-							children: t("create.generate")
-						}), (0, react_jsx_runtime.jsx)("button", {
-							type: "button",
-							className: form.importing ? X402WalletModal_module_css_default.segmentActive : X402WalletModal_module_css_default.segment,
-							onClick: () => {
-								actions.patchCreateForm({ importing: true });
-							},
-							children: t("create.import")
-						})]
+						children: [
+							(0, react_jsx_runtime.jsx)("button", {
+								type: "button",
+								className: form.mode === "generate" ? X402WalletModal_module_css_default.segmentActive : X402WalletModal_module_css_default.segment,
+								onClick: () => {
+									actions.patchCreateForm({ mode: "generate" });
+								},
+								children: t("create.generate")
+							}),
+							(0, react_jsx_runtime.jsx)("button", {
+								type: "button",
+								className: form.mode === "key" ? X402WalletModal_module_css_default.segmentActive : X402WalletModal_module_css_default.segment,
+								onClick: () => {
+									actions.patchCreateForm({ mode: "key" });
+								},
+								children: t("create.import")
+							}),
+							(0, react_jsx_runtime.jsx)("button", {
+								type: "button",
+								className: form.mode === "mnemonic" ? X402WalletModal_module_css_default.segmentActive : X402WalletModal_module_css_default.segment,
+								onClick: () => {
+									actions.patchCreateForm({ mode: "mnemonic" });
+								},
+								children: t("create.mnemonic")
+							})
+						]
 					}),
-					form.importing && (0, react_jsx_runtime.jsxs)("label", {
+					form.mode === "key" && (0, react_jsx_runtime.jsxs)("label", {
 						className: X402WalletModal_module_css_default.field,
 						children: [(0, react_jsx_runtime.jsx)("span", {
 							className: X402WalletModal_module_css_default.fieldLabel,
@@ -3223,7 +3258,21 @@ window.__ModuleLoader__.load({
 							}
 						})]
 					}),
-					form.importing && (0, react_jsx_runtime.jsx)("div", {
+					form.mode === "mnemonic" && (0, react_jsx_runtime.jsxs)("label", {
+						className: X402WalletModal_module_css_default.field,
+						children: [(0, react_jsx_runtime.jsx)("span", {
+							className: X402WalletModal_module_css_default.fieldLabel,
+							children: t("create.mnemonic")
+						}), (0, react_jsx_runtime.jsx)("textarea", {
+							className: X402WalletModal_module_css_default.textarea,
+							value: form.mnemonic,
+							placeholder: t("create.mnemonicPlaceholder"),
+							onChange: (event) => {
+								actions.patchCreateForm({ mnemonic: event.target.value });
+							}
+						})]
+					}),
+					(form.mode === "key" || form.mode === "mnemonic") && (0, react_jsx_runtime.jsx)("div", {
 						className: X402WalletModal_module_css_default.hint,
 						children: t("create.importHint")
 					}),
@@ -3420,9 +3469,9 @@ window.__ModuleLoader__.load({
 			document.head.appendChild(tag);
 		}
 		var X402WalletEntry_module_css_default = {
-			"entryMark": "gH8mvq_entryMark",
+			"entry": "gH8mvq_entry",
 			"entryLabel": "gH8mvq_entryLabel",
-			"entry": "gH8mvq_entry"
+			"entryMark": "gH8mvq_entryMark"
 		};
 		//#endregion
 		//#region lib/types/client/X402WalletEntry.js
@@ -3525,8 +3574,8 @@ window.__ModuleLoader__.load({
 			document.head.appendChild(tag);
 		}
 		var X402PaymentRow_module_css_default = {
-			"field": "_2gl9da_field",
 			"details": "_2gl9da_details",
+			"field": "_2gl9da_field",
 			"tx": "_2gl9da_tx"
 		};
 		//#endregion
@@ -3608,6 +3657,7 @@ window.__ModuleLoader__.load({
 			"receive.copy": "复制地址",
 			"receive.copied": "已复制",
 			"receive.qr": "收款二维码",
+			"receive.faucet": "获取测试网 USDC",
 			"send.to": "收款地址",
 			"send.toPlaceholder": "0x…",
 			"send.amount": "金额（USDC）",
@@ -3624,6 +3674,8 @@ window.__ModuleLoader__.load({
 			"create.labelPlaceholder": "例如：小额支付",
 			"create.generate": "生成新钱包",
 			"create.import": "导入私钥",
+			"create.mnemonic": "导入助记词",
+			"create.mnemonicPlaceholder": "12 或 24 个英文单词，空格分隔",
 			"create.importHint": "私钥只保存在本机凭据存储中，不会出现在对话、日志或网络上。",
 			"create.privateKey": "私钥",
 			"create.privateKeyPlaceholder": "0x…（64 位十六进制）",
@@ -3669,6 +3721,7 @@ window.__ModuleLoader__.load({
 			"receive.copy": "Copy address",
 			"receive.copied": "Copied",
 			"receive.qr": "Receive QR code",
+			"receive.faucet": "Get testnet USDC",
 			"send.to": "Recipient address",
 			"send.toPlaceholder": "0x…",
 			"send.amount": "Amount (USDC)",
@@ -3685,6 +3738,8 @@ window.__ModuleLoader__.load({
 			"create.labelPlaceholder": "e.g. Micro payments",
 			"create.generate": "Generate new wallet",
 			"create.import": "Import private key",
+			"create.mnemonic": "Import mnemonic",
+			"create.mnemonicPlaceholder": "12 or 24 words, space-separated",
 			"create.importHint": "The private key is stored only in the local credential store; it never reaches the conversation, the logs, or the network.",
 			"create.privateKey": "Private key",
 			"create.privateKeyPlaceholder": "0x… (64 hex chars)",
@@ -3711,8 +3766,9 @@ window.__ModuleLoader__.load({
 		});
 		const initialCreateForm = () => ({
 			label: "",
+			mode: "generate",
 			privateKey: "",
-			importing: false,
+			mnemonic: "",
 			busy: false,
 			error: null
 		});
@@ -3843,16 +3899,16 @@ window.__ModuleLoader__.load({
 							actions.endRefresh();
 						}
 					};
-					const createWallet = async (label, privateKey) => {
+					const createWallet = async (label, privateKey, mnemonic) => {
 						actions.patchCreateForm({
 							busy: true,
 							error: null
 						});
 						try {
-							const answer = await ctx.remote.x402.createWallet(privateKey === void 0 ? { label } : {
-								label,
-								privateKey
-							});
+							const request = { label };
+							if (privateKey !== void 0) request.privateKey = privateKey;
+							if (mnemonic !== void 0) request.mnemonic = mnemonic;
+							const answer = await ctx.remote.x402.createWallet(request);
 							if (!answer.ok) throw new Error(answer.error.message);
 							actions.resetCreateForm();
 							actions.setView({ kind: "main" });

@@ -14,7 +14,7 @@ dsh plugin --profile web add @danielng23/dsh-x402-wallet
 
 Restart `dsh web` — the **x402 Wallet** entry appears in the sidebar.
 
-![dsh-x402-wallet — the x402 payment wallet popup in the DeepSeek Harness web GUI](screenshot.png)
+<p align="center"><img src="assets/demo.gif" alt="DSH X402 Wallet — install, open the popup, receive by QR, send USDC" width="720"></p>
 
 ## What it is
 
@@ -32,6 +32,24 @@ Two different transfers, one wallet:
 |---|---|---|
 | Agent calls a paid API | Model runs `x402_pay` → probe → cap → approval → EIP-3009 signature → gateway settles | none (paid by the API provider's gateway) |
 | You move funds out of the wallet | Popup **Send** → plain on-chain ERC-20 transfer (viem, awaited receipt) | yes (normal network gas) |
+
+## Try it free on testnet
+
+No real money needed: point the host service at **Base Sepolia** and grab testnet USDC from the in-app faucet link on the receive screen.
+
+```yaml
+# cordis.yml patch rows with a testnet config
+- insert:
+    - id: x402
+      name: '@danielng23/dsh-x402'
+      config:
+        network: eip155:84532
+        rpcUrl: https://sepolia.base.org
+    - id: ui-x402
+      name: '@danielng23/dsh-client-ui-x402'
+```
+
+Create a wallet, open **Receive**, and follow the **Get testnet USDC** link to fund it — then ask the agent to pay for an API.
 
 ## Install
 

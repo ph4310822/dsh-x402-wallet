@@ -8,7 +8,7 @@ import {
   IconPlusOutline16, IconRefreshOutline16, IconSendOutline16, Modal, writeClipboard,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { X402HistoryEntry, X402PaymentRecord, X402WalletRecord, X402WalletState } from '@danielng23/dsh-x402/types'
-import { explorerTxUrl } from './explorer.ts'
+import { explorerTxUrl, faucetUrl } from './explorer.ts'
 import type { X402CreateForm, X402SendForm, X402WalletView } from './store.ts'
 import type { X402ModalFace } from './slots.ts'
 import type { X402WalletEntryProps } from './X402WalletEntry.tsx'
@@ -123,6 +123,8 @@ function MainView({ wallet, history, payments, t, onSend, onReceive, onCreate }:
 function ReceiveView({ wallet, t }: { wallet: X402WalletState | null; t: X402WalletEntryProps['t'] }) {
   const [copied, setCopied] = useState(false)
   const address = wallet?.configured === true ? (wallet.address ?? '') : ''
+  const network = wallet?.network ?? ''
+  const faucet = faucetUrl(network)
   const copy = (): void => {
     void writeClipboard(address).then((ok) => {
       if (!ok || copied) return
@@ -140,7 +142,10 @@ function ReceiveView({ wallet, t }: { wallet: X402WalletState | null; t: X402Wal
           ? <span className={css.copyOk}><IconCheckOutline16 />{t('receive.copied')}</span>
           : <><IconCopyOutline16 />{t('receive.copy')}</>}
       </button>
-      <div className={css.hint}>{t('receive.hint', { network: wallet?.network ?? '' })}</div>
+      <div className={css.hint}>{t('receive.hint', { network })}</div>
+      {faucet !== undefined && (
+        <a className={css.faucet} href={faucet} target="_blank" rel="noreferrer">{t('receive.faucet')}</a>
+      )}
     </div>
   )
 }
@@ -225,7 +230,12 @@ function CreateView({ form, t, face, actions }: {
     event.preventDefault()
     if (form.busy) return
     const key = form.privateKey.trim()
-    void face.createWallet(form.label.trim(), form.importing && key !== '' ? key : undefined)
+    const mnemonic = form.mnemonic.trim()
+    void face.createWallet(
+      form.label.trim(),
+      form.mode === 'key' && key !== '' ? key : undefined,
+      form.mode === 'mnemonic' && mnemonic !== '' ? mnemonic : undefined,
+    )
   }
   return (
     <form className={css.form} onSubmit={submit}>
@@ -241,20 +251,27 @@ function CreateView({ form, t, face, actions }: {
       <div className={css.segmented}>
         <button
           type="button"
-          className={form.importing ? css.segment : css.segmentActive}
-          onClick={() => { actions.patchCreateForm({ importing: false }) }}
+          className={form.mode === 'generate' ? css.segmentActive : css.segment}
+          onClick={() => { actions.patchCreateForm({ mode: 'generate' }) }}
         >
           {t('create.generate')}
         </button>
         <button
           type="button"
-          className={form.importing ? css.segmentActive : css.segment}
-          onClick={() => { actions.patchCreateForm({ importing: true }) }}
+          className={form.mode === 'key' ? css.segmentActive : css.segment}
+          onClick={() => { actions.patchCreateForm({ mode: 'key' }) }}
         >
           {t('create.import')}
         </button>
+        <button
+          type="button"
+          className={form.mode === 'mnemonic' ? css.segmentActive : css.segment}
+          onClick={() => { actions.patchCreateForm({ mode: 'mnemonic' }) }}
+        >
+          {t('create.mnemonic')}
+        </button>
       </div>
-      {form.importing && (
+      {form.mode === 'key' && (
         <label className={css.field}>
           <span className={css.fieldLabel}>{t('create.privateKey')}</span>
           <textarea
@@ -265,7 +282,18 @@ function CreateView({ form, t, face, actions }: {
           />
         </label>
       )}
-      {form.importing && <div className={css.hint}>{t('create.importHint')}</div>}
+      {form.mode === 'mnemonic' && (
+        <label className={css.field}>
+          <span className={css.fieldLabel}>{t('create.mnemonic')}</span>
+          <textarea
+            className={css.textarea}
+            value={form.mnemonic}
+            placeholder={t('create.mnemonicPlaceholder')}
+            onChange={(event) => { actions.patchCreateForm({ mnemonic: event.target.value }) }}
+          />
+        </label>
+      )}
+      {(form.mode === 'key' || form.mode === 'mnemonic') && <div className={css.hint}>{t('create.importHint')}</div>}
       {form.error !== null && <div className={css.error}>{form.error}</div>}
       <button type="submit" className={css.primary} disabled={form.busy}>
         {form.busy ? t('create.busy') : t('create.submit')}

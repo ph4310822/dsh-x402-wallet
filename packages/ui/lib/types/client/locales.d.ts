@@ -31,6 +31,7 @@ export declare const zh: {
     'receive.copy': string;
     'receive.copied': string;
     'receive.qr': string;
+    'receive.faucet': string;
     'send.to': string;
     'send.toPlaceholder': string;
     'send.amount': string;
@@ -47,6 +48,8 @@ export declare const zh: {
     'create.labelPlaceholder': string;
     'create.generate': string;
     'create.import': string;
+    'create.mnemonic': string;
+    'create.mnemonicPlaceholder': string;
     'create.importHint': string;
     'create.privateKey': string;
     'create.privateKeyPlaceholder': string;
@@ -100,6 +103,7 @@ export declare const en: {
     'receive.copy': string;
     'receive.copied': string;
     'receive.qr': string;
+    'receive.faucet': string;
     'send.to': string;
     'send.toPlaceholder': string;
     'send.amount': string;
@@ -116,6 +120,8 @@ export declare const en: {
     'create.labelPlaceholder': string;
     'create.generate': string;
     'create.import': string;
+    'create.mnemonic': string;
+    'create.mnemonicPlaceholder': string;
     'create.importHint': string;
     'create.privateKey': string;
     'create.privateKeyPlaceholder': string;

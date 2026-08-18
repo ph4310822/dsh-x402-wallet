@@ -4,6 +4,7 @@ import { z } from 'zod'
 const _deepseek_ai_dsh_x402_x402_createWallet_parameter_0$schema = z.object({
   'label': z.string(),
   'privateKey': z.string().optional(),
+  'mnemonic': z.string().optional(),
 })
 const _deepseek_ai_dsh_x402_x402_createWallet_result$schema = z.object({
   'id': z.string(),
@@ -26,7 +27,7 @@ const _deepseek_ai_dsh_x402_x402_payments_result$schema = z.array(z.object({
   'amountUsdc': z.string(),
   'network': z.string(),
   'transaction': z.string().optional(),
-  'status': z.union([z.literal("failed"), z.literal("settled")]),
+  'status': z.union([z.literal("settled"), z.literal("failed")]),
   'time': z.number(),
 }))
 const _deepseek_ai_dsh_x402_x402_selectWallet_parameter_0$schema = z.string()
@@ -87,7 +88,7 @@ export const TYPERT = {
         typeSymbol: '@deepseek-ai/dsh-x402/types#X402WalletRecord',
         schema: _deepseek_ai_dsh_x402_x402_createWallet_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":273,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":329,"column":9},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/history',
@@ -113,7 +114,7 @@ export const TYPERT = {
         typeSymbol: '@deepseek-ai/dsh-x402#x402/history:result',
         schema: _deepseek_ai_dsh_x402_x402_history_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":332,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":400,"column":9},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/payments',
@@ -128,7 +129,7 @@ export const TYPERT = {
         typeSymbol: '@deepseek-ai/dsh-x402#x402/payments:result',
         schema: _deepseek_ai_dsh_x402_x402_payments_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":342,"column":3},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":410,"column":3},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/selectWallet',
@@ -153,7 +154,7 @@ export const TYPERT = {
         typeSymbol: '@deepseek-ai/dsh-x402#x402/selectWallet:result',
         schema: _deepseek_ai_dsh_x402_x402_selectWallet_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":305,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":373,"column":9},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/send',
@@ -178,7 +179,7 @@ export const TYPERT = {
         typeSymbol: '@deepseek-ai/dsh-x402/types#X402SendReceipt',
         schema: _deepseek_ai_dsh_x402_x402_send_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":318,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":386,"column":9},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/wallet',
@@ -193,7 +194,7 @@ export const TYPERT = {
         typeSymbol: '@deepseek-ai/dsh-x402/types#X402WalletState',
         schema: _deepseek_ai_dsh_x402_x402_wallet_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":237,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":293,"column":9},
     },
     {
       id: '@deepseek-ai/dsh-x402#x402/wallets',
@@ -208,7 +209,7 @@ export const TYPERT = {
         typeSymbol: '@deepseek-ai/dsh-x402#x402/wallets:result',
         schema: _deepseek_ai_dsh_x402_x402_wallets_result$schema,
       },
-      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":259,"column":9},
+      sourceLocation: {"file":"packages/x402/x402/src/index.ts","line":315,"column":9},
     },
   ],
   model: {
@@ -252,7 +253,7 @@ export const TYPERT = {
           {
             "kind": "method",
             "name": "createWallet",
-            "signature": "@Remote('createWallet') async createWallet(request: { label: string; privateKey?: string }): Promise<X402WalletRecord>",
+            "signature": "@Remote('createWallet') async createWallet(request: { label: string; privateKey?: string; mnemonic?: string }): Promise<X402WalletRecord>",
             "summary": "Create a wallet: generate a fresh key, or import a provided one.",
             "jsDoc": "/**\n * Create a wallet: generate a fresh key, or import a provided one. The key\n * is written to the credentials store; the registry keeps only public data.\n * @param request - label and an optional private key to import.\n * @returns the new wallet record; it becomes the selection when it is the first.\n */"
           },
@@ -354,18 +355,6 @@ export const TYPERT = {
             "declaration": "export interface CodeDispatchStartEventData {\n    rootCallId: CallId;\n    parentCallId: CallId;\n    subCallId: CallId;\n    name: string;\n    arguments: unknown;\n}"
           },
           {
-            "name": "CommandId",
-            "declaration": "export type CommandId = Branded<'CommandId'>;"
-          },
-          {
-            "name": "CommandSource",
-            "declaration": "export type CommandSource = CommandSourceMap[keyof CommandSourceMap];"
-          },
-          {
-            "name": "CommandSourceMap",
-            "declaration": "export interface CommandSourceMap {\n    user: { kind: 'user'; };\n}"
-          },
-          {
             "name": "ContentBlock",
             "declaration": "export type ContentBlock = ContentBlockMap[ContentBlockType];"
           },
@@ -396,46 +385,6 @@ export const TYPERT = {
           {
             "name": "FinishReasonMap",
             "declaration": "export interface FinishReasonMap {\n    stop: { kind: 'stop'; };\n    'tool-calls': { kind: 'tool-calls'; };\n    'max-tokens': { kind: 'max-tokens'; };\n    aborted: { kind: 'aborted'; failure: LlmFailure; };\n    error: { kind: 'error'; failure: LlmFailure; };\n}"
-          },
-          {
-            "name": "GoalBlockReason",
-            "declaration": "export interface GoalBlockReason {\n    readonly code: string;\n    readonly message: string;\n}"
-          },
-          {
-            "name": "GoalChangeMeta",
-            "declaration": "export type GoalChangeMeta = GoalSnapshotChangeMeta | GoalClearChangeMeta;"
-          },
-          {
-            "name": "GoalClearChangeMeta",
-            "declaration": "export interface GoalClearChangeMeta {\n    readonly kind: 'goal/change';\n    readonly version: 1;\n    readonly operation: 'clear';\n    readonly cleared: GoalRef;\n    readonly clearedAt: number;\n}"
-          },
-          {
-            "name": "GoalId",
-            "declaration": "export type GoalId = Branded<'GoalId'>;"
-          },
-          {
-            "name": "GoalMessageSource",
-            "declaration": "export interface GoalMessageSource {\n    readonly kind: 'goal';\n    readonly goalId: GoalId;\n    readonly revision: number;\n    readonly round: number;\n}"
-          },
-          {
-            "name": "GoalOperation",
-            "declaration": "export type GoalOperation = 'create' | 'edit' | 'pause' | 'resume' | 'complete' | 'block' | 'clear';"
-          },
-          {
-            "name": "GoalPhase",
-            "declaration": "export type GoalPhase = 'active' | 'paused' | 'blocked' | 'complete';"
-          },
-          {
-            "name": "GoalRef",
-            "declaration": "export interface GoalRef {\n    readonly id: GoalId;\n    readonly revision: number;\n}"
-          },
-          {
-            "name": "GoalSnapshot",
-            "declaration": "export interface GoalSnapshot extends GoalRef {\n    readonly objective: string;\n    readonly phase: GoalPhase;\n    readonly blockedReason?: GoalBlockReason;\n    readonly maxGoalRounds: number;\n}"
-          },
-          {
-            "name": "GoalSnapshotChangeMeta",
-            "declaration": "export interface GoalSnapshotChangeMeta {\n    readonly kind: 'goal/change';\n    readonly version: 1;\n    readonly operation: Exclude<GoalOperation, 'clear'>;\n    readonly goal: GoalSnapshot;\n    readonly roundsStarted: number;\n    readonly createdAt: number;\n    readonly updatedAt: number;\n}"
           },
           {
             "name": "ImageAttachmentRef",
@@ -487,7 +436,7 @@ export const TYPERT = {
           },
           {
             "name": "MessageSourceMap",
-            "declaration": "export interface MessageSourceMap {\n    user: { kind: 'user'; };\n    plugin: { kind: 'plugin'; plugin: string; } & ContextFormed;\n    model: ModelMessageSource;\n    tool: ToolMessageSource;\n    goal: GoalMessageSource;\n}"
+            "declaration": "export interface MessageSourceMap {\n    user: { kind: 'user'; };\n    plugin: { kind: 'plugin'; plugin: string; } & ContextFormed;\n    model: ModelMessageSource;\n    tool: ToolMessageSource;\n}"
           },
           {
             "name": "ModelMessageSource",
@@ -523,7 +472,7 @@ export const TYPERT = {
           },
           {
             "name": "SessionEventMap",
-            "declaration": "export interface SessionEventMap {\n    'turn/start': { turn: number; };\n    'turn/end': { turn: number; reason: TurnEndReason; };\n    'step/start': { turn: number; step: number; };\n    'step/end': { turn: number; step: number; };\n    'user/message': UserMessage;\n    'assistant/chunk': { turn: number; step: number; chunk: StreamChunk; };\n    'assistant/message': { turn: number; step: number; message: AssistantMessage; usage?: TokenUsage; };\n    'tool/call': { turn: number; step: number; callId: CallId; name: string; arguments: string; };\n    'tool/result': { turn: number; step: number; message: ToolResultMessage; error?: { name: string; code: string; }; meta?: JsonValue; };\n    'todo/write': { todos: TodoItem[]; };\n    'request/header': { header: EpochHeader; reason: RequestHeaderReason; };\n    'request/context': RequestContext;\n    'session/end-seed': Record<string, never>;\n    'agent/inbox/spliced': { target: InboxTarget; start: number; removedCount?: number; inserted: UserMessage[]; outcome?: 'canceled'; };\n    'command/run': { commandId: CommandId; name: string; args?: string; source: CommandSource; };\n    'command/done': { commandId: CommandId; kind: 'success' | 'error'; text?: string; sourceEventSeq?: number; };\n    'approval/asked': { id: ApprovalRequestId; toolName: string; callId?: CallId; reason?: string; };\n    'approval/decided': { id: ApprovalRequestId; outcome: ApprovalOutcome; };\n    'approval/policy': { policy: ApprovalPolicy; source?: 'delegation'; };\n    'tool/code-dispatch-start': CodeDispatchStartEventData;\n    'tool/code-dispatch': CodeDispatchEventData;\n    'goal/change': GoalChangeMeta;\n}"
+            "declaration": "export interface SessionEventMap {\n    'turn/start': { turn: number; };\n    'turn/end': { turn: number; reason: TurnEndReason; };\n    'step/start': { turn: number; step: number; };\n    'step/end': { turn: number; step: number; };\n    'user/message': UserMessage;\n    'assistant/chunk': { turn: number; step: number; chunk: StreamChunk; };\n    'assistant/message': { turn: number; step: number; message: AssistantMessage; usage?: TokenUsage; };\n    'tool/call': { turn: number; step: number; callId: CallId; name: string; arguments: string; };\n    'tool/result': { turn: number; step: number; message: ToolResultMessage; error?: { name: string; code: string; }; meta?: JsonValue; };\n    'todo/write': { todos: TodoItem[]; };\n    'request/header': { header: EpochHeader; reason: RequestHeaderReason; };\n    'request/context': RequestContext;\n    'session/end-seed': Record<string, never>;\n    'agent/inbox/spliced': { target: InboxTarget; start: number; removedCount?: number; inserted: UserMessage[]; outcome?: 'canceled'; };\n    'approval/asked': { id: ApprovalRequestId; toolName: string; callId?: CallId; reason?: string; };\n    'approval/decided': { id: ApprovalRequestId; outcome: ApprovalOutcome; };\n    'approval/policy': { policy: ApprovalPolicy; source?: 'delegation'; };\n    'tool/code-dispatch-start': CodeDispatchStartEventData;\n    'tool/code-dispatch': CodeDispatchEventData;\n}"
           },
           {
             "name": "SessionEventType",

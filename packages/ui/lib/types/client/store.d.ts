@@ -24,14 +24,18 @@ export interface X402SendForm {
     /** Confirmed receipt of the last send, when one succeeded. */
     done: X402SendReceipt | null;
 }
+/** Create-mode: generate a fresh key, import a private key, or import a mnemonic. */
+export type X402CreateMode = 'generate' | 'key' | 'mnemonic';
 /** Create/import-form working state. */
 export interface X402CreateForm {
     /** Wallet label being typed. */
     label: string;
-    /** Imported private key, when the user chose to import. */
+    /** Active creation mode. */
+    mode: X402CreateMode;
+    /** Imported private key, when the user chose to import one. */
     privateKey: string;
-    /** Whether the form imports a key instead of generating one. */
-    importing: boolean;
+    /** Imported mnemonic phrase, when the user chose to import one. */
+    mnemonic: string;
     /** Whether a create is in flight. */
     busy: boolean;
     /** Last create failure, when one occurred. */

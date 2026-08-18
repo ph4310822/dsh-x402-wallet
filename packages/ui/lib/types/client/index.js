@@ -62,10 +62,15 @@ export function apply(ctx) {
                     actions.endRefresh();
                 }
             };
-            const createWallet = async (label, privateKey) => {
+            const createWallet = async (label, privateKey, mnemonic) => {
                 actions.patchCreateForm({ busy: true, error: null });
                 try {
-                    const answer = await ctx.remote.x402.createWallet(privateKey === undefined ? { label } : { label, privateKey });
+                    const request = { label };
+                    if (privateKey !== undefined)
+                        request.privateKey = privateKey;
+                    if (mnemonic !== undefined)
+                        request.mnemonic = mnemonic;
+                    const answer = await ctx.remote.x402.createWallet(request);
                     if (!answer.ok)
                         throw new Error(answer.error.message);
                     actions.resetCreateForm();

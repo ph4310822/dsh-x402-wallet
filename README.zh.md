@@ -14,7 +14,7 @@ dsh plugin --profile web add @danielng23/dsh-x402-wallet
 
 重启 `dsh web`——侧边栏出现 **x402 钱包** 入口。
 
-![dsh-x402-wallet — DeepSeek Harness Web GUI 中的 x402 支付钱包弹窗](screenshot.png)
+<p align="center"><img src="assets/demo.gif" alt="DSH X402 Wallet —— 安装、打开弹窗、扫码收款、转出 USDC" width="720"></p>
 
 ## 它是什么
 
@@ -32,6 +32,24 @@ dsh plugin --profile web add @danielng23/dsh-x402-wallet
 |---|---|---|
 | Agent 调用付费 API | 模型执行 `x402_pay` → 探测 → 上限 → 审批 → EIP-3009 签名 → 网关结算 | 无（由 API 提供方的网关承担） |
 | 你把资金转出钱包 | 弹窗 **发送** → 普通链上 ERC-20 转账（viem，等待回执） | 有（正常网络 gas） |
+
+## 在测试网免费试用
+
+不需要真钱：把 host 服务指向 **Base Sepolia**，收款屏里有测试网水龙头链接，一键领取测试 USDC。
+
+```yaml
+# 带测试网配置的 cordis.yml 补丁行
+- insert:
+    - id: x402
+      name: '@danielng23/dsh-x402'
+      config:
+        network: eip155:84532
+        rpcUrl: https://sepolia.base.org
+    - id: ui-x402
+      name: '@danielng23/dsh-client-ui-x402'
+```
+
+创建钱包后打开**收款**屏，点击**获取测试网 USDC** 链接充值，然后让 Agent 去支付调用 API。
 
 ## 安装
 

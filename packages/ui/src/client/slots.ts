@@ -10,8 +10,8 @@ export interface X402EntryFace {
 export interface X402ModalFace {
   /** Refresh the wallet snapshot, registry, history, and payments from the Host. */
   refresh: () => Promise<void>
-  /** Create (generate) or import a wallet and switch to it. */
-  createWallet: (label: string, privateKey?: string) => Promise<void>
+  /** Create (generate) or import a wallet and switch to it; import either a private key or a mnemonic. */
+  createWallet: (label: string, privateKey?: string, mnemonic?: string) => Promise<void>
   /** Make one wallet the selection. */
   selectWallet: (id: string) => Promise<void>
   /** Send USDC from the current wallet and wait for confirmation. */

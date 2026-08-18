@@ -77,12 +77,13 @@ export function apply(ctx: ClientContext): void {
           actions.endRefresh()
         }
       }
-      const createWallet = async (label: string, privateKey?: string): Promise<void> => {
+      const createWallet = async (label: string, privateKey?: string, mnemonic?: string): Promise<void> => {
         actions.patchCreateForm({ busy: true, error: null })
         try {
-          const answer = await ctx.remote.x402.createWallet(
-            privateKey === undefined ? { label } : { label, privateKey },
-          )
+          const request: { label: string; privateKey?: string; mnemonic?: string } = { label }
+          if (privateKey !== undefined) request.privateKey = privateKey
+          if (mnemonic !== undefined) request.mnemonic = mnemonic
+          const answer = await ctx.remote.x402.createWallet(request)
           if (!answer.ok) throw new Error(answer.error.message)
           actions.resetCreateForm()
           actions.setView({ kind: 'main' })

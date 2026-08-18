@@ -13,8 +13,8 @@ import { type CallId } from '@deepseek-ai/dsh-llm'
 import type { Network } from '@x402/core/types'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type {} from '@deepseek-ai/dsh-user-approval'
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
-import { isAddress } from 'viem'
+import { generatePrivateKey, mnemonicToAccount, privateKeyToAccount } from 'viem/accounts'
+import { isAddress, toHex } from 'viem'
 import type { Hex } from 'viem'
 import { createX402Protocol, X402Error } from './protocol.ts'
 import type { X402Protocol } from './protocol.ts'
@@ -57,6 +57,8 @@ export interface X402Config {
   keyRef?: string
   /** Total on-chain history window in blocks, scanned in provider-safe chunks (default 200000). */
   historyBlockRange?: number
+  /** Whether startup backfills payment records from on-chain transfers to catalog payees (default true). */
+  reconcileOnStart?: boolean
 }
 
 /** Injectable construction inputs that keep the service socket-free in tests. */
@@ -79,6 +81,7 @@ export class X402Service extends TypertRemoteService {
     approvalRequired: s.boolean().default(true),
     keyRef: s.string().default('X402_PRIVATE_KEY'),
     historyBlockRange: s.natural().min(1).max(1_000_000).default(200_000),
+    reconcileOnStart: s.boolean().default(true),
   })
 
   private readonly config: Required<X402Config>
@@ -121,6 +124,65 @@ export class X402Service extends TypertRemoteService {
       this.paymentsTable = domain.table('payments')
       this.restorePayments(this.paymentsTable)
       await this.seedLegacyWallet()
+      if (this.config.reconcileOnStart) {
+        void this.reconcilePayments().catch(() => { /* best-effort backfill never blocks startup. */ })
+      }
+    }
+  }
+
+  /**
+   * Backfill payment records for on-chain transfers that predate persistence:
+   * scan the current wallet's outgoing transfers and re-record the ones that
+   * went to a catalog payee. Best-effort — network or catalog failures leave
+   * the ring untouched.
+   */
+  private async reconcilePayments(): Promise<void> {
+    const store = this.walletStore
+    /* v8 ignore next 1 -- init assigns both before reconciling; the guard is defensive. */
+    if (store === undefined || this.paymentsTable === undefined) return
+    let current: X402Wallet
+    try {
+      current = await this.requireCurrentWallet()
+    } catch {
+      return
+    }
+    const known = await this.catalogPayees()
+    if (known.size === 0) return
+    let transfers: X402HistoryEntry[]
+    try {
+      transfers = await this.protocol.history(current.address, 100)
+    } catch {
+      // RPC unreachable — reconciliation is best-effort.
+      return
+    }
+    const existing = new Set(this.records.map(record => record.transaction).filter((tx): tx is string => tx !== undefined))
+    for (const entry of transfers) {
+      if (entry.direction !== 'out') continue
+      if (!known.has(entry.to)) continue
+      if (existing.has(entry.hash)) continue
+      await this.record({
+        url: 'recovered from chain',
+        amountUsdc: entry.amountUsdc,
+        transaction: entry.hash,
+        status: 'settled',
+      })
+      existing.add(entry.hash)
+    }
+  }
+
+  /** The set of known x402 payee addresses from the discovery catalog. */
+  private async catalogPayees(): Promise<Set<string>> {
+    try {
+      const response = await this.fetchImpl(this.config.catalogUrl)
+      const catalog = await response.json() as { services?: Array<{ pay_to?: unknown }> }
+      const payees = new Set<string>()
+      for (const service of catalog.services ?? []) {
+        if (typeof service.pay_to === 'string') payees.add(service.pay_to.toLowerCase())
+      }
+      return payees
+    } catch {
+      // Catalog unreachable — reconciliation skips.
+      return new Set()
     }
   }
 
@@ -270,15 +332,28 @@ export class X402Service extends TypertRemoteService {
    * @returns the new wallet record; it becomes the selection when it is the first.
    */
   @Remote('createWallet')
-  async createWallet(request: { label: string; privateKey?: string }): Promise<X402WalletRecord> {
+  async createWallet(request: { label: string; privateKey?: string; mnemonic?: string }): Promise<X402WalletRecord> {
     const store = this.requireWalletStore()
     const label = request.label.trim()
     if (label.length === 0) throw new X402Error('invalid-wallet', 'Wallet label must not be empty.')
     const id = mintWalletId()
     const keyRef = keyRefOf(id)
     const privateKey = request.privateKey?.trim()
+    const mnemonic = request.mnemonic?.trim()
     let key: string
-    if (privateKey === undefined || privateKey.length === 0) {
+    if (mnemonic !== undefined && mnemonic.length > 0) {
+      let account: ReturnType<typeof mnemonicToAccount>
+      try {
+        account = mnemonicToAccount(mnemonic)
+      } catch {
+        throw new X402Error('invalid-wallet', 'The imported mnemonic is invalid.')
+      }
+      const hdKey = account.getHdKey()
+      /* v8 ignore next 1 -- a valid mnemonic always yields a private key. */
+      if (hdKey.privateKey === null) throw new X402Error('invalid-wallet', 'The imported mnemonic is invalid.')
+      key = toHex(hdKey.privateKey)
+      await this.ctx.credentials.set(credentialRef(`${keyRef}_MNEMONIC`), mnemonic)
+    } else if (privateKey === undefined || privateKey.length === 0) {
       key = generatePrivateKey()
     } else {
       try {

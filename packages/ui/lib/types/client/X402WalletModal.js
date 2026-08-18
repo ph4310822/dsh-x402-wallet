@@ -3,7 +3,7 @@ import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-run
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 import { IconCheckOutline16, IconChevronDownOutline14, IconCloseOutline16, IconCopyOutline16, IconPlusOutline16, IconRefreshOutline16, IconSendOutline16, Modal, writeClipboard, } from '@deepseek-ai/dsh-client-ui-primitives';
-import { explorerTxUrl } from "./explorer.js";
+import { explorerTxUrl, faucetUrl } from "./explorer.js";
 import css from './X402WalletModal.module.css';
 /** Truncate an address to a displayable short form. */
 export function shortAddress(address) {
@@ -33,6 +33,8 @@ function MainView({ wallet, history, payments, t, onSend, onReceive, onCreate })
 function ReceiveView({ wallet, t }) {
     const [copied, setCopied] = useState(false);
     const address = wallet?.configured === true ? (wallet.address ?? '') : '';
+    const network = wallet?.network ?? '';
+    const faucet = faucetUrl(network);
     const copy = () => {
         void writeClipboard(address).then((ok) => {
             if (!ok || copied)
@@ -43,7 +45,7 @@ function ReceiveView({ wallet, t }) {
     };
     return (_jsxs("div", { className: css.receive, children: [_jsx("div", { className: css.qrWrap, "aria-label": t('receive.qr'), children: _jsx(QRCode, { value: address || ' ', size: 148 }) }), _jsx("div", { className: css.addressLabel, children: t('receive.address') }), _jsx("code", { className: css.address, children: address }), _jsx("button", { type: "button", className: css.primary, "aria-label": t('receive.copy'), onClick: copy, children: copied
                     ? _jsxs("span", { className: css.copyOk, children: [_jsx(IconCheckOutline16, {}), t('receive.copied')] })
-                    : _jsxs(_Fragment, { children: [_jsx(IconCopyOutline16, {}), t('receive.copy')] }) }), _jsx("div", { className: css.hint, children: t('receive.hint', { network: wallet?.network ?? '' }) })] }));
+                    : _jsxs(_Fragment, { children: [_jsx(IconCopyOutline16, {}), t('receive.copy')] }) }), _jsx("div", { className: css.hint, children: t('receive.hint', { network }) }), faucet !== undefined && (_jsx("a", { className: css.faucet, href: faucet, target: "_blank", rel: "noreferrer", children: t('receive.faucet') }))] }));
 }
 /** Render the send view: recipient + amount, then the confirmed receipt. */
 function SendView({ form, t, face, actions, network }) {
@@ -70,9 +72,10 @@ function CreateView({ form, t, face, actions }) {
         if (form.busy)
             return;
         const key = form.privateKey.trim();
-        void face.createWallet(form.label.trim(), form.importing && key !== '' ? key : undefined);
+        const mnemonic = form.mnemonic.trim();
+        void face.createWallet(form.label.trim(), form.mode === 'key' && key !== '' ? key : undefined, form.mode === 'mnemonic' && mnemonic !== '' ? mnemonic : undefined);
     };
-    return (_jsxs("form", { className: css.form, onSubmit: submit, children: [_jsxs("label", { className: css.field, children: [_jsx("span", { className: css.fieldLabel, children: t('create.label') }), _jsx("input", { className: css.input, value: form.label, placeholder: t('create.labelPlaceholder'), onChange: (event) => { actions.patchCreateForm({ label: event.target.value }); } })] }), _jsxs("div", { className: css.segmented, children: [_jsx("button", { type: "button", className: form.importing ? css.segment : css.segmentActive, onClick: () => { actions.patchCreateForm({ importing: false }); }, children: t('create.generate') }), _jsx("button", { type: "button", className: form.importing ? css.segmentActive : css.segment, onClick: () => { actions.patchCreateForm({ importing: true }); }, children: t('create.import') })] }), form.importing && (_jsxs("label", { className: css.field, children: [_jsx("span", { className: css.fieldLabel, children: t('create.privateKey') }), _jsx("textarea", { className: css.textarea, value: form.privateKey, placeholder: t('create.privateKeyPlaceholder'), onChange: (event) => { actions.patchCreateForm({ privateKey: event.target.value }); } })] })), form.importing && _jsx("div", { className: css.hint, children: t('create.importHint') }), form.error !== null && _jsx("div", { className: css.error, children: form.error }), _jsx("button", { type: "submit", className: css.primary, disabled: form.busy, children: form.busy ? t('create.busy') : t('create.submit') })] }));
+    return (_jsxs("form", { className: css.form, onSubmit: submit, children: [_jsxs("label", { className: css.field, children: [_jsx("span", { className: css.fieldLabel, children: t('create.label') }), _jsx("input", { className: css.input, value: form.label, placeholder: t('create.labelPlaceholder'), onChange: (event) => { actions.patchCreateForm({ label: event.target.value }); } })] }), _jsxs("div", { className: css.segmented, children: [_jsx("button", { type: "button", className: form.mode === 'generate' ? css.segmentActive : css.segment, onClick: () => { actions.patchCreateForm({ mode: 'generate' }); }, children: t('create.generate') }), _jsx("button", { type: "button", className: form.mode === 'key' ? css.segmentActive : css.segment, onClick: () => { actions.patchCreateForm({ mode: 'key' }); }, children: t('create.import') }), _jsx("button", { type: "button", className: form.mode === 'mnemonic' ? css.segmentActive : css.segment, onClick: () => { actions.patchCreateForm({ mode: 'mnemonic' }); }, children: t('create.mnemonic') })] }), form.mode === 'key' && (_jsxs("label", { className: css.field, children: [_jsx("span", { className: css.fieldLabel, children: t('create.privateKey') }), _jsx("textarea", { className: css.textarea, value: form.privateKey, placeholder: t('create.privateKeyPlaceholder'), onChange: (event) => { actions.patchCreateForm({ privateKey: event.target.value }); } })] })), form.mode === 'mnemonic' && (_jsxs("label", { className: css.field, children: [_jsx("span", { className: css.fieldLabel, children: t('create.mnemonic') }), _jsx("textarea", { className: css.textarea, value: form.mnemonic, placeholder: t('create.mnemonicPlaceholder'), onChange: (event) => { actions.patchCreateForm({ mnemonic: event.target.value }); } })] })), (form.mode === 'key' || form.mode === 'mnemonic') && _jsx("div", { className: css.hint, children: t('create.importHint') }), form.error !== null && _jsx("div", { className: css.error, children: form.error }), _jsx("button", { type: "submit", className: css.primary, disabled: form.busy, children: form.busy ? t('create.busy') : t('create.submit') })] }));
 }
 /** Render the wallet switcher list, one row per registered wallet. */
 function WalletList({ wallets, t, onPick, onNew }) {

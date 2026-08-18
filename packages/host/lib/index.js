@@ -2,8 +2,8 @@ import { Service } from "@deepseek-ai/cordis";
 import s from "@deepseek-ai/schemastery";
 import { credentialRef } from "@deepseek-ai/dsh-credentials";
 import { Remote, TypertRemoteService } from "@deepseek-ai/dsh-typert-protocol";
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { createPublicClient, createWalletClient, custom, encodeFunctionData, isAddress } from "viem";
+import { generatePrivateKey, mnemonicToAccount, privateKeyToAccount } from "viem/accounts";
+import { createPublicClient, createWalletClient, custom, encodeFunctionData, isAddress, toHex } from "viem";
 import { x402Client, x402HTTPClient } from "@x402/core/client";
 import { ExactEvmScheme, getDefaultAsset } from "@x402/evm";
 import { base } from "viem/chains";
@@ -799,7 +799,8 @@ let X402Service = (() => {
 			defaultMaxCostUsdc: s.number().min(0).default(1),
 			approvalRequired: s.boolean().default(true),
 			keyRef: s.string().default("X402_PRIVATE_KEY"),
-			historyBlockRange: s.natural().min(1).max(1e6).default(2e5)
+			historyBlockRange: s.natural().min(1).max(1e6).default(2e5),
+			reconcileOnStart: s.boolean().default(true)
 		});
 		config = __runInitializers(this, _instanceExtraInitializers);
 		protocol;
@@ -843,6 +844,55 @@ let X402Service = (() => {
 				this.paymentsTable = domain.table("payments");
 				this.restorePayments(this.paymentsTable);
 				await this.seedLegacyWallet();
+				if (this.config.reconcileOnStart) this.reconcilePayments().catch(() => {});
+			}
+		}
+		/**
+		* Backfill payment records for on-chain transfers that predate persistence:
+		* scan the current wallet's outgoing transfers and re-record the ones that
+		* went to a catalog payee. Best-effort — network or catalog failures leave
+		* the ring untouched.
+		*/
+		async reconcilePayments() {
+			/* v8 ignore next 1 -- init assigns both before reconciling; the guard is defensive. */
+			if (this.walletStore === void 0 || this.paymentsTable === void 0) return;
+			let current;
+			try {
+				current = await this.requireCurrentWallet();
+			} catch {
+				return;
+			}
+			const known = await this.catalogPayees();
+			if (known.size === 0) return;
+			let transfers;
+			try {
+				transfers = await this.protocol.history(current.address, 100);
+			} catch {
+				return;
+			}
+			const existing = new Set(this.records.map((record) => record.transaction).filter((tx) => tx !== void 0));
+			for (const entry of transfers) {
+				if (entry.direction !== "out") continue;
+				if (!known.has(entry.to)) continue;
+				if (existing.has(entry.hash)) continue;
+				await this.record({
+					url: "recovered from chain",
+					amountUsdc: entry.amountUsdc,
+					transaction: entry.hash,
+					status: "settled"
+				});
+				existing.add(entry.hash);
+			}
+		}
+		/** The set of known x402 payee addresses from the discovery catalog. */
+		async catalogPayees() {
+			try {
+				const catalog = await (await this.fetchImpl(this.config.catalogUrl)).json();
+				const payees = /* @__PURE__ */ new Set();
+				for (const service of catalog.services ?? []) if (typeof service.pay_to === "string") payees.add(service.pay_to.toLowerCase());
+				return payees;
+			} catch {
+				return /* @__PURE__ */ new Set();
 			}
 		}
 		/** The durable wallet registry; unavailable only before init in direct constructions. */
@@ -970,8 +1020,21 @@ let X402Service = (() => {
 			const id = mintWalletId();
 			const keyRef = keyRefOf(id);
 			const privateKey = request.privateKey?.trim();
+			const mnemonic = request.mnemonic?.trim();
 			let key;
-			if (privateKey === void 0 || privateKey.length === 0) key = generatePrivateKey();
+			if (mnemonic !== void 0 && mnemonic.length > 0) {
+				let account;
+				try {
+					account = mnemonicToAccount(mnemonic);
+				} catch {
+					throw new X402Error("invalid-wallet", "The imported mnemonic is invalid.");
+				}
+				const hdKey = account.getHdKey();
+				/* v8 ignore next 1 -- a valid mnemonic always yields a private key. */
+				if (hdKey.privateKey === null) throw new X402Error("invalid-wallet", "The imported mnemonic is invalid.");
+				key = toHex(hdKey.privateKey);
+				await this.ctx.credentials.set(credentialRef(`${keyRef}_MNEMONIC`), mnemonic);
+			} else if (privateKey === void 0 || privateKey.length === 0) key = generatePrivateKey();
 			else {
 				try {
 					privateKeyToAccount(privateKey);

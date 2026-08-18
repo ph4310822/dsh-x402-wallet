@@ -7,7 +7,7 @@ import type { X402HistoryEntry, X402PaymentRecord, X402SendReceipt, X402WalletRe
 
 declare module '@deepseek-ai/dsh-typert-protocol' {
   interface TypertRemoteNamespace$78343032 {
-    createWallet: (request: { label: string; privateKey?: string; }) => Promise<RemoteResult<X402WalletRecord>>
+    createWallet: (request: { label: string; privateKey?: string; mnemonic?: string; }) => Promise<RemoteResult<X402WalletRecord>>
     history: (limit?: number) => Promise<RemoteResult<X402HistoryEntry[]>>
     payments: () => Promise<RemoteResult<X402PaymentRecord[]>>
     selectWallet: (id: string) => Promise<RemoteResult<{ ok: true; }>>
@@ -16,7 +16,7 @@ declare module '@deepseek-ai/dsh-typert-protocol' {
     wallets: () => Promise<RemoteResult<X402WalletRecord[]>>
   }
   interface TypertRemoteMap {
-    'x402/createWallet': (request: { label: string; privateKey?: string; }) => Promise<RemoteResult<X402WalletRecord>>
+    'x402/createWallet': (request: { label: string; privateKey?: string; mnemonic?: string; }) => Promise<RemoteResult<X402WalletRecord>>
     'x402/history': (limit?: number) => Promise<RemoteResult<X402HistoryEntry[]>>
     'x402/payments': () => Promise<RemoteResult<X402PaymentRecord[]>>
     'x402/selectWallet': (id: string) => Promise<RemoteResult<{ ok: true; }>>

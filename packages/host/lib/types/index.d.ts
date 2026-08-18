@@ -34,6 +34,8 @@ export interface X402Config {
     keyRef?: string;
     /** Total on-chain history window in blocks, scanned in provider-safe chunks (default 200000). */
     historyBlockRange?: number;
+    /** Whether startup backfills payment records from on-chain transfers to catalog payees (default true). */
+    reconcileOnStart?: boolean;
 }
 /** Injectable construction inputs that keep the service socket-free in tests. */
 export interface X402ServiceDeps {
@@ -60,6 +62,15 @@ export declare class X402Service extends TypertRemoteService {
      */
     constructor(ctx: Context, config: X402Config, deps?: X402ServiceDeps);
     protected [Service.init](): Promise<void>;
+    /**
+     * Backfill payment records for on-chain transfers that predate persistence:
+     * scan the current wallet's outgoing transfers and re-record the ones that
+     * went to a catalog payee. Best-effort — network or catalog failures leave
+     * the ring untouched.
+     */
+    private reconcilePayments;
+    /** The set of known x402 payee addresses from the discovery catalog. */
+    private catalogPayees;
     /** The durable wallet registry; unavailable only before init in direct constructions. */
     private requireWalletStore;
     /** The selected wallet, or a loud refusal when none exists. */
@@ -101,6 +112,7 @@ export declare class X402Service extends TypertRemoteService {
     createWallet(request: {
         label: string;
         privateKey?: string;
+        mnemonic?: string;
     }): Promise<X402WalletRecord>;
     /**
      * Make one wallet the selection used by payments and transfers.
