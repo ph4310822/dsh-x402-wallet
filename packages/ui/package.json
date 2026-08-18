@@ -1,7 +1,7 @@
 {
   "name": "@danielng23/dsh-client-ui-x402",
   "description": "x402 wallet GUI, browser half: a Phantom-style wallet popup (create/import and switch wallets, QR receive, USDC send, on-chain activity) and a payment card for x402_pay calls, fed by the x402 Host remote",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",

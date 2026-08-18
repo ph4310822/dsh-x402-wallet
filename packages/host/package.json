@@ -1,7 +1,7 @@
 {
   "name": "@danielng23/dsh-x402",
   "description": "x402 payment capability: native @x402 protocol client, wallet via ctx.credentials, model-facing discover/estimate/pay/balance tools, and a GUI-facing wallet remote",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
