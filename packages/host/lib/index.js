@@ -79,6 +79,10 @@ const TRANSFER_EVENT = {
 		}
 	]
 };
+/** Provider-safe `eth_getLogs` range per query; base.org rejects ranges at or above 10,000. */
+const HISTORY_CHUNK = 9000n;
+/** Chunk-pairs queried concurrently per wave; bounds RPC fan-out while keeping deep scans fast. */
+const HISTORY_WAVE = 4;
 /** Per-RPC-call timeout: a hung public node must not stall the GUI refresh. */
 const RPC_TIMEOUT_MS = 2e4;
 /**
@@ -319,38 +323,56 @@ function createX402Protocol(deps) {
 		},
 		async history(address, limit = 50) {
 			const publicClient = thisPublic();
-			const toBlock = await publicClient.getBlockNumber();
-			const fromBlock = toBlock - (deps.historyBlockRange ?? 9000n);
-			const [outLogs, inLogs] = await Promise.all([publicClient.getLogs({
-				address: asset.address,
-				event: TRANSFER_EVENT,
-				args: { from: address },
-				fromBlock,
-				toBlock
-			}), publicClient.getLogs({
-				address: asset.address,
-				event: TRANSFER_EVENT,
-				args: { to: address },
-				fromBlock,
-				toBlock
-			})]);
-			return [...outLogs.map((log) => ({
-				log,
-				direction: "out"
-			})), ...inLogs.map((log) => ({
-				log,
-				direction: "in"
-			}))].flatMap(({ log, direction }) => {
-				if (log.args.from === void 0 || log.args.to === void 0 || log.args.value === void 0) return [];
-				return [{
-					hash: log.transactionHash,
-					from: log.args.from,
-					to: log.args.to,
-					value: log.args.value,
-					blockNumber: Number(log.blockNumber),
-					direction
-				}];
-			}).sort((a, b) => b.blockNumber - a.blockNumber).slice(0, limit).map((entry) => ({
+			const latest = await publicClient.getBlockNumber();
+			const floor = latest - (deps.historyBlockRange ?? 200000n);
+			const ranges = [];
+			let to = latest;
+			while (to > floor) {
+				const from = to - HISTORY_CHUNK > floor ? to - HISTORY_CHUNK : floor;
+				ranges.push({
+					from,
+					to
+				});
+				to = from - 1n;
+			}
+			const entries = [];
+			for (let start = 0; start < ranges.length && entries.length < limit; start += HISTORY_WAVE) {
+				const wave = ranges.slice(start, start + HISTORY_WAVE);
+				const settled = await Promise.all(wave.map(async ({ from, to }) => {
+					const [outLogs, inLogs] = await Promise.all([publicClient.getLogs({
+						address: asset.address,
+						event: TRANSFER_EVENT,
+						args: { from: address },
+						fromBlock: from,
+						toBlock: to
+					}), publicClient.getLogs({
+						address: asset.address,
+						event: TRANSFER_EVENT,
+						args: { to: address },
+						fromBlock: from,
+						toBlock: to
+					})]);
+					return [...outLogs.map((log) => ({
+						log,
+						direction: "out"
+					})), ...inLogs.map((log) => ({
+						log,
+						direction: "in"
+					}))];
+				}));
+				for (const tagged of settled) for (const { log, direction } of tagged) {
+					if (log.args.from === void 0 || log.args.to === void 0 || log.args.value === void 0) continue;
+					entries.push({
+						hash: log.transactionHash,
+						from: log.args.from,
+						to: log.args.to,
+						value: log.args.value,
+						blockNumber: Number(log.blockNumber),
+						direction
+					});
+				}
+			}
+			return entries.sort((a, b) => b.blockNumber - a.blockNumber).slice(0, limit).map((entry) => ({
 				hash: entry.hash,
 				from: entry.from,
 				to: entry.to,
@@ -777,7 +799,7 @@ let X402Service = (() => {
 			defaultMaxCostUsdc: s.number().min(0).default(1),
 			approvalRequired: s.boolean().default(true),
 			keyRef: s.string().default("X402_PRIVATE_KEY"),
-			historyBlockRange: s.natural().min(1).max(1e5).default(9e3)
+			historyBlockRange: s.natural().min(1).max(1e6).default(2e5)
 		});
 		config = __runInitializers(this, _instanceExtraInitializers);
 		protocol;

@@ -134,8 +134,14 @@ const TRANSFER_EVENT = {
   ],
 } as const
 
-/** Default on-chain history window in blocks; public RPCs reject `eth_getLogs` ranges at or above 10,000. */
-export const DEFAULT_HISTORY_BLOCK_RANGE = 9_000n
+/** Default on-chain history window in blocks (~5 days on Base). */
+export const DEFAULT_HISTORY_BLOCK_RANGE = 200_000n
+
+/** Provider-safe `eth_getLogs` range per query; base.org rejects ranges at or above 10,000. */
+const HISTORY_CHUNK = 9_000n
+
+/** Chunk-pairs queried concurrently per wave; bounds RPC fan-out while keeping deep scans fast. */
+const HISTORY_WAVE = 4
 
 /** Per-RPC-call timeout: a hung public node must not stall the GUI refresh. */
 const RPC_TIMEOUT_MS = 20_000
@@ -405,26 +411,51 @@ export function createX402Protocol(deps: X402ProtocolDeps): X402Protocol {
 
     async history(address, limit = 50) {
       const publicClient = thisPublic()
-      const toBlock = await publicClient.getBlockNumber()
-      const fromBlock = toBlock - (deps.historyBlockRange ?? DEFAULT_HISTORY_BLOCK_RANGE)
-      const [outLogs, inLogs] = await Promise.all([
-        publicClient.getLogs({ address: asset.address as Address, event: TRANSFER_EVENT, args: { from: address }, fromBlock, toBlock }),
-        publicClient.getLogs({ address: asset.address as Address, event: TRANSFER_EVENT, args: { to: address }, fromBlock, toBlock }),
-      ])
-      const entries = [
-        ...outLogs.map(log => ({ log, direction: 'out' as const })),
-        ...inLogs.map(log => ({ log, direction: 'in' as const })),
-      ].flatMap(({ log, direction }) => {
-        if (log.args.from === undefined || log.args.to === undefined || log.args.value === undefined) return []
-        return [{
-          hash: log.transactionHash,
-          from: log.args.from,
-          to: log.args.to,
-          value: log.args.value,
-          blockNumber: Number(log.blockNumber),
-          direction,
-        }]
-      })
+      const latest = await publicClient.getBlockNumber()
+      const floor = latest - (deps.historyBlockRange ?? DEFAULT_HISTORY_BLOCK_RANGE)
+      // Provider caps each eth_getLogs range, so the window is scanned in
+      // newest-first chunks; the scan stops early once enough entries landed.
+      const ranges: Array<{ from: bigint; to: bigint }> = []
+      let to = latest
+      while (to > floor) {
+        const from = to - HISTORY_CHUNK > floor ? to - HISTORY_CHUNK : floor
+        ranges.push({ from, to })
+        to = from - 1n
+      }
+      const entries: Array<{
+        hash: string
+        from: string
+        to: string
+        value: bigint
+        blockNumber: number
+        direction: 'out' | 'in'
+      }> = []
+      for (let start = 0; start < ranges.length && entries.length < limit; start += HISTORY_WAVE) {
+        const wave = ranges.slice(start, start + HISTORY_WAVE)
+        const settled = await Promise.all(wave.map(async ({ from, to }) => {
+          const [outLogs, inLogs] = await Promise.all([
+            publicClient.getLogs({ address: asset.address as Address, event: TRANSFER_EVENT, args: { from: address }, fromBlock: from, toBlock: to }),
+            publicClient.getLogs({ address: asset.address as Address, event: TRANSFER_EVENT, args: { to: address }, fromBlock: from, toBlock: to }),
+          ])
+          return [
+            ...outLogs.map(log => ({ log, direction: 'out' as const })),
+            ...inLogs.map(log => ({ log, direction: 'in' as const })),
+          ]
+        }))
+        for (const tagged of settled) {
+          for (const { log, direction } of tagged) {
+            if (log.args.from === undefined || log.args.to === undefined || log.args.value === undefined) continue
+            entries.push({
+              hash: log.transactionHash,
+              from: log.args.from,
+              to: log.args.to,
+              value: log.args.value,
+              blockNumber: Number(log.blockNumber),
+              direction,
+            })
+          }
+        }
+      }
       return entries
         .sort((a, b) => b.blockNumber - a.blockNumber)
         .slice(0, limit)

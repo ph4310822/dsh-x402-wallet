@@ -88,7 +88,7 @@ let X402Service = (() => {
             defaultMaxCostUsdc: s.number().min(0).default(1),
             approvalRequired: s.boolean().default(true),
             keyRef: s.string().default('X402_PRIVATE_KEY'),
-            historyBlockRange: s.natural().min(1).max(100_000).default(9_000),
+            historyBlockRange: s.natural().min(1).max(1_000_000).default(200_000),
         });
         config = __runInitializers(this, _instanceExtraInitializers);
         protocol;

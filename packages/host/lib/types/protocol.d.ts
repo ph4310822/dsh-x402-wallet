@@ -75,8 +75,8 @@ export interface X402ProtocolDeps {
     /** Resolve the wallet private key from the credential store, per operation. */
     resolveKey: () => Promise<string | undefined>;
 }
-/** Default on-chain history window in blocks; public RPCs reject `eth_getLogs` ranges at or above 10,000. */
-export declare const DEFAULT_HISTORY_BLOCK_RANGE = 9000n;
+/** Default on-chain history window in blocks (~5 days on Base). */
+export declare const DEFAULT_HISTORY_BLOCK_RANGE = 200000n;
 /**
  * Parse a human USDC amount into the token's smallest unit.
  * @param amountUsdc - decimal string, e.g. `1.25`.
