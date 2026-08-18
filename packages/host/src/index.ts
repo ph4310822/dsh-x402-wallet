@@ -55,7 +55,7 @@ export interface X402Config {
   approvalRequired?: boolean
   /** Credential reference for the payment wallet private key. */
   keyRef?: string
-  /** On-chain history window in blocks; public RPCs cap `eth_getLogs` ranges (default 10000). */
+  /** On-chain history window in blocks; public RPCs reject `eth_getLogs` ranges at or above 10000 (default 9000). */
   historyBlockRange?: number
 }
 
@@ -78,7 +78,7 @@ export class X402Service extends TypertRemoteService {
     defaultMaxCostUsdc: s.number().min(0).default(1),
     approvalRequired: s.boolean().default(true),
     keyRef: s.string().default('X402_PRIVATE_KEY'),
-    historyBlockRange: s.natural().min(1).max(100_000).default(10_000),
+    historyBlockRange: s.natural().min(1).max(100_000).default(9_000),
   })
 
   private readonly config: Required<X402Config>

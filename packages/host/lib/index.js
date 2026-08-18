@@ -79,6 +79,8 @@ const TRANSFER_EVENT = {
 		}
 	]
 };
+/** Per-RPC-call timeout: a hung public node must not stall the GUI refresh. */
+const RPC_TIMEOUT_MS = 2e4;
 /**
 * Parse a human USDC amount into the token's smallest unit.
 * @param amountUsdc - decimal string, e.g. `1.25`.
@@ -103,18 +105,26 @@ function parseUsdcAmount(amountUsdc, decimals) {
 */
 function createRpcTransport(fetchImpl, rpcUrl) {
 	return custom({ request: async ({ method, params }) => {
-		const json = await (await fetchImpl(rpcUrl, {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({
-				jsonrpc: "2.0",
-				id: 1,
-				method,
-				params: params ?? []
-			})
-		})).json();
-		if (json.error !== void 0) throw new Error(`x402 RPC ${method} failed: ${json.error.message ?? "unknown error"}`);
-		return json.result;
+		/* v8 ignore next 3 -- viem always supplies params for readContract calls; the fallback is defensive. */
+		const rpcBody = JSON.stringify({
+			jsonrpc: "2.0",
+			id: 1,
+			method,
+			params: params ?? []
+		});
+		try {
+			const json = await (await fetchImpl(rpcUrl, {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: rpcBody,
+				signal: AbortSignal.timeout(RPC_TIMEOUT_MS)
+			})).json();
+			if (json.error !== void 0) throw new Error(`x402 RPC ${method} failed: ${json.error.message ?? "unknown error"}`);
+			return json.result;
+		} catch (error) {
+			if (error instanceof Error && error.name === "TimeoutError") throw new Error(`x402 RPC ${method} timed out after ${RPC_TIMEOUT_MS}ms`);
+			throw error;
+		}
 	} });
 }
 /**
@@ -310,7 +320,7 @@ function createX402Protocol(deps) {
 		async history(address, limit = 50) {
 			const publicClient = thisPublic();
 			const toBlock = await publicClient.getBlockNumber();
-			const fromBlock = toBlock - (deps.historyBlockRange ?? 10000n);
+			const fromBlock = toBlock - (deps.historyBlockRange ?? 9000n);
 			const [outLogs, inLogs] = await Promise.all([publicClient.getLogs({
 				address: asset.address,
 				event: TRANSFER_EVENT,
@@ -767,7 +777,7 @@ let X402Service = (() => {
 			defaultMaxCostUsdc: s.number().min(0).default(1),
 			approvalRequired: s.boolean().default(true),
 			keyRef: s.string().default("X402_PRIVATE_KEY"),
-			historyBlockRange: s.natural().min(1).max(1e5).default(1e4)
+			historyBlockRange: s.natural().min(1).max(1e5).default(9e3)
 		});
 		config = __runInitializers(this, _instanceExtraInitializers);
 		protocol;

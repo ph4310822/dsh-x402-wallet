@@ -32,7 +32,7 @@ export interface X402Config {
     approvalRequired?: boolean;
     /** Credential reference for the payment wallet private key. */
     keyRef?: string;
-    /** On-chain history window in blocks; public RPCs cap `eth_getLogs` ranges (default 10000). */
+    /** On-chain history window in blocks; public RPCs reject `eth_getLogs` ranges at or above 10000 (default 9000). */
     historyBlockRange?: number;
 }
 /** Injectable construction inputs that keep the service socket-free in tests. */

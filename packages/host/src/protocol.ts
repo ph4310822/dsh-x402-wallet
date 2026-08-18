@@ -134,8 +134,11 @@ const TRANSFER_EVENT = {
   ],
 } as const
 
-/** Default on-chain history window in blocks; public RPCs cap `eth_getLogs` around 10,000. */
-export const DEFAULT_HISTORY_BLOCK_RANGE = 10_000n
+/** Default on-chain history window in blocks; public RPCs reject `eth_getLogs` ranges at or above 10,000. */
+export const DEFAULT_HISTORY_BLOCK_RANGE = 9_000n
+
+/** Per-RPC-call timeout: a hung public node must not stall the GUI refresh. */
+const RPC_TIMEOUT_MS = 20_000
 
 /**
  * Parse a human USDC amount into the token's smallest unit.
@@ -165,16 +168,24 @@ function createRpcTransport(fetchImpl: typeof fetch, rpcUrl: string) {
     request: async ({ method, params }: { method: string; params?: unknown[] }) => {
       /* v8 ignore next 3 -- viem always supplies params for readContract calls; the fallback is defensive. */
       const rpcBody = JSON.stringify({ jsonrpc: '2.0', id: 1, method, params: (params ?? []) })
-      const response = await fetchImpl(rpcUrl, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: rpcBody,
-      })
-      const json = await response.json() as { result?: unknown; error?: { message?: string } }
-      if (json.error !== undefined) {
-        throw new Error(`x402 RPC ${method} failed: ${json.error.message ?? 'unknown error'}`)
+      try {
+        const response = await fetchImpl(rpcUrl, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: rpcBody,
+          signal: AbortSignal.timeout(RPC_TIMEOUT_MS),
+        })
+        const json = await response.json() as { result?: unknown; error?: { message?: string } }
+        if (json.error !== undefined) {
+          throw new Error(`x402 RPC ${method} failed: ${json.error.message ?? 'unknown error'}`)
+        }
+        return json.result
+      } catch (error) {
+        if (error instanceof Error && error.name === 'TimeoutError') {
+          throw new Error(`x402 RPC ${method} timed out after ${RPC_TIMEOUT_MS}ms`)
+        }
+        throw error
       }
-      return json.result
     },
   })
 }
